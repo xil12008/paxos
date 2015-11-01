@@ -1,5 +1,6 @@
 import threading
 import socket
+import time
 
 def UDPClient():
     print threading.currentThread().getName(), 'Starting'
@@ -26,7 +27,7 @@ def UDPServer():
     sock.bind((UDP_IP, UDP_PORT))
 
     while True:
-        data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
+        data, addr = sock.recvfrom(20) # buffer size is 1024 bytes
         print "UDP received message:", data
     print threading.currentThread().getName(), 'Exiting'
     return
@@ -63,20 +64,33 @@ def TCPServer():
     while 1:
         data = conn.recv(BUFFER_SIZE)
         if not data: break
-        print "TCP received data:", data
+        print "TCP Server received data:", data
         conn.send(data)  # echo
     conn.close()
     print threading.currentThread().getName(), 'Exiting'
     return
 
-tUDPClient = threading.Thread(target=UDPClient)
-tUDPClient.start()
-
 tUDPServer = threading.Thread(target=UDPServer)
+tUDPServer.daemon = True
 tUDPServer.start()
 
+time.sleep(1)
+
+tUDPClient = threading.Thread(target=UDPClient)
+tUDPClient.daemon = True
+tUDPClient.start()
+
+time.sleep(1)
+
 tTCPServer = threading.Thread(target=TCPServer)
+tTCPServer.daemon = True
 tTCPServer.start()
 
+time.sleep(1)
+
 tTCPClient = threading.Thread(target=TCPClient)
+tTCPClient.daemon = True
 tTCPClient.start()
+
+while threading.active_count() > 0:
+    time.sleep(0.1)
