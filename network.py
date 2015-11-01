@@ -83,7 +83,7 @@ tUDPServer = threading.Thread(target=UDPServer)
 tUDPServer.daemon = True
 tUDPServer.start()
 
-time.sleep(1)
+time.sleep(5)
 
 tUDPClient = threading.Thread(target=UDPClient)
 tUDPClient.daemon = True
@@ -95,7 +95,7 @@ time.sleep(1)
 #tTCPServer.daemon = True
 #tTCPServer.start()
 #
-#time.sleep(1)
+#time.sleep(5)
 #
 #tTCPClient = threading.Thread(target=TCPClient)
 #tTCPClient.daemon = True
