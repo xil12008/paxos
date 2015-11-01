@@ -92,15 +92,15 @@ tUDPClient.start()
 
 time.sleep(1)
 
-tTCPServer = threading.Thread(target=TCPServer)
-tTCPServer.daemon = True
-tTCPServer.start()
-
-time.sleep(1)
-
-tTCPClient = threading.Thread(target=TCPClient)
-tTCPClient.daemon = True
-tTCPClient.start()
+#tTCPServer = threading.Thread(target=TCPServer)
+#tTCPServer.daemon = True
+#tTCPServer.start()
+#
+#time.sleep(1)
+#
+#tTCPClient = threading.Thread(target=TCPClient)
+#tTCPClient.daemon = True
+#tTCPClient.start()
 
 while threading.active_count() > 0:
     time.sleep(0.1)
