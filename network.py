@@ -18,7 +18,7 @@ def UDPClient():
         sock = socket.socket(socket.AF_INET, # Internet
                              socket.SOCK_DGRAM) # UDP
         sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
-        print threading.currentThread().getName(), 'UDP Client Exiting. I am Node#', ID
+    print threading.currentThread().getName(), 'UDP Client Exiting. I am Node#', ID
     return
 
 def UDPServer():
@@ -54,7 +54,7 @@ def TCPClient():
         s.close()
     
         print "NODE %d TCP client received data: %s" %( ID,  data)
-        print threading.currentThread().getName(), 'TCP Client Exiting. I am Node #', ID
+    print threading.currentThread().getName(), 'TCP Client Exiting. I am Node #', ID
     return
 
 def TCPServer():
