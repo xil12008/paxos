@@ -24,16 +24,15 @@ def UDPClient():
 def UDPServer():
     ID = Configuration.getMyID()
     print threading.currentThread().getName(), 'UDP Server Starting. I am Node#', ID
-    UDP_IP = "127.0.0.1"
     UDP_PORT = 5005
 
     sock = socket.socket(socket.AF_INET, # Internet
                          socket.SOCK_DGRAM) # UDP
-    sock.bind((UDP_IP, UDP_PORT))
+    sock.bind(('', UDP_PORT))
 
     while True:
-        data, addr = sock.recvfrom(20) # buffer size is 1024 bytes
-        print "UDP received message:", data
+        data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
+        print "NODE#", ID, " UDP received message:", data
     print threading.currentThread().getName(), 'UDP Server Exiting. I am Node#', ID
     return
 
