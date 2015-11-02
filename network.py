@@ -3,6 +3,7 @@ import socket
 import time
 from configuration import Configuration
 
+#tag:udpclient
 def UDPClient():
     ID = Configuration.getMyID()
     print threading.currentThread().getName(), 'UDP Client Starting. I am Node#', ID
@@ -12,15 +13,18 @@ def UDPClient():
         UDP_PORT = Configuration.UDPPORT 
         MESSAGE = "Hello, World! from node %d" % ID 
 
-        print "UDP target IP:", UDP_IP
-        print "UDP target port:", UDP_PORT
-        print "UDP sending message:", MESSAGE
+        #print "UDP target IP:", UDP_IP
+        #print "UDP target port:", UDP_PORT
+        #print "UDP sending message:", MESSAGE
+        print "NODE#", ID, "---UDP--->NODE#", Configuration.getID(UDP_IP), ": ",\
+                 MESSAGE
         sock = socket.socket(socket.AF_INET, # Internet
                              socket.SOCK_DGRAM) # UDP
         sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
     print threading.currentThread().getName(), 'UDP Client Exiting. I am Node#', ID
     return
 
+#tag:udpserver
 def UDPServer():
     ID = Configuration.getMyID()
     print threading.currentThread().getName(), 'UDP Server Starting. I am Node#', ID
@@ -32,10 +36,12 @@ def UDPServer():
 
     while True:
         data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
-        print "NODE#", ID, " UDP received message:", data
+        print "NODE#", Configuration.getID(addr), "---UDP--->NODE#", ID, ": ", 
+             data
     print threading.currentThread().getName(), 'UDP Server Exiting. I am Node#', ID
     return
 
+#tag:tcpclient
 def TCPClient():
     ID = Configuration.getMyID()
     print threading.currentThread().getName(), 'TCP Client Starting. I am Node#', ID
@@ -56,6 +62,7 @@ def TCPClient():
     print threading.currentThread().getName(), 'TCP Client Exiting. I am Node #', ID
     return
 
+#tag:tcpserver
 def TCPServer():
     ID = Configuration.getMyID()
     print threading.currentThread().getName(), 'TCP Server Starting. I am Node#', ID
