@@ -8,7 +8,7 @@ from configuration import Configuration
 
 #tag:print
 def printdata(head, node, source, end, data):
-    print "P%d: %s %d-->%d data=[%s]" %( node, head, source, end, data)
+    print "NODE#%d: %s %d-->%d data=[%s]" %( node, head, source, end, data)
 
 #tag:udpclient
 def UDPClient():
@@ -111,7 +111,7 @@ def TCPServer():
                 if data: 
                     s.send(data) 
                 else: 
-                    print "LOST CONNECTION FROM ", s.getpeername()
+                    print "LOST CONNECTION FROM NODE#%d :  %s" %(Configuration.getID(s.getpeername()[0]), s.getpeername())
                     s.close() 
                     input.remove(s) 
     server.close()
