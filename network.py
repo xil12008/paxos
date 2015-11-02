@@ -52,26 +52,30 @@ def TCPClient():
     ID = Configuration.getMyID()
     print threading.currentThread().getName(), 'TCP Client Starting. I am Node#', ID
 
-    for ip in Configuration.IPTABLE:
-        if ip == MYIP: continue #Ignore itself
-        TCP_IP = ip 
-        TCP_PORT = Configuration.TCPPORT 
-        BUFFER_SIZE = 1024
-        MESSAGE = "Hello, World! from Node#%d" % ID
-    
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        flag = True
-        while flag:
-            try:
-                s.connect((TCP_IP, TCP_PORT))
-                s.send(MESSAGE)
-                printdata("TCP Send", ID, ID, Configuration.getID(TCP_IP), MESSAGE)
-                data = s.recv(BUFFER_SIZE)
-                s.close()
-                flag = False
-            except:
-                printdata("TCP Reconnect", ID, ID, Configuration.getID(TCP_IP), "@_@")
-                time.sleep(1) #Reconnect delay 
+    while True:
+        user_input = raw_input("format: send <Dest Node ID> <Message>")
+        cmd = user_input.split(" ")
+        for ip in Configuration.IPTABLE:
+            if ip == MYIP: continue #Ignore itself
+            TCP_IP = ip 
+            TCP_PORT = Configuration.TCPPORT 
+            BUFFER_SIZE = 1024
+            MESSAGE = "Hello, World! from Node#%d" % ID
+        
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            flag = True
+            while flag:
+                try:
+                    s.connect((TCP_IP, TCP_PORT))
+                    s.send(MESSAGE)
+                    printdata("TCP Send", ID, ID, Configuration.getID(TCP_IP), MESSAGE)
+                    data = s.recv(BUFFER_SIZE)
+                    s.close()
+                    flag = False
+                except:
+                    printdata("TCP Client Reconnect", ID, ID, Configuration.getID(TCP_IP), "@_@")
+                    time.sleep(1) #Reconnect delay 
+        time.sleep(5)
     
     print threading.currentThread().getName(), 'TCP Client Exiting. I am Node #', ID
     return
@@ -97,7 +101,7 @@ def TCPServer():
                 # handle the server socket 
                 client, address = server.accept() 
                 input.append(client) 
-                print 'NODE#', ID,'<-----connect-----> NODE#' , Configuration.getID(address[0]) , "(", len(input) - 2, "over", Configuration.getN() - 1, "connections)"
+                print 'TCP Server NODE#', ID,'<-----connect-----> NODE#' , Configuration.getID(address[0]) , "TCP Client (", len(input) - 2, "over", Configuration.getN() - 1, "connections)"
     
             else: 
                 # handle all other sockets 
