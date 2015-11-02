@@ -59,8 +59,9 @@ def TCPClient():
         s.send(MESSAGE)
         data = s.recv(BUFFER_SIZE)
         s.close()
+      
+        printdata("TCP Send", ID, ID, Configuration.getID(TCP_IP), MESSAGE)
     
-        print "NODE %d TCP client received data: %s" %( ID,  data)
     print threading.currentThread().getName(), 'TCP Client Exiting. I am Node #', ID
     return
 
@@ -68,47 +69,48 @@ def TCPClient():
 def TCPServer():
     ID = Configuration.getMyID()
     print threading.currentThread().getName(), 'TCP Server Starting. I am Node#', ID
-    TCP_IP = '127.0.0.1'
-    TCP_PORT = 12345
-    BUFFER_SIZE = 20  # Normally 1024, but we want fast response
+    TCP_IP = ''
+    TCP_PORT = Configuration.TCPPORT 
+    BUFFER_SIZE = 1024  # Normally 1024, but we want fast response
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((TCP_IP, TCP_PORT))
+    s.bind(('localhost', TCP_PORT))
+    print 'starting up on %s port %s' % ('localhost', TCP_PORT) 
     s.listen(1)
 
     conn, addr = s.accept()
     print 'TCP NODE#', ID,' Connection address:' , addr
-    print 'NODE#', ID,'<---connect----> NODE#' , Configuration.getID(addr)
+    print 'NODE#', ID,'<-----connect-----> NODE#' , Configuration.getID(addr)
     while 1:
         data = conn.recv(BUFFER_SIZE)
         if not data: break
-        print "NODE %d TCP Server received data:%s" %( ID,  data)
+        printdata("TCP Recv", ID, Configuration.getID(addr[0]), ID, data)
         conn.send(data)  # echo
     conn.close()
     print threading.currentThread().getName(), 'TCP Server Exiting. I am NODE#', ID
     return
 
-tUDPServer = threading.Thread(target=UDPServer)
-tUDPServer.daemon = True
-tUDPServer.start()
-
-time.sleep(5)
-
-tUDPClient = threading.Thread(target=UDPClient)
-tUDPClient.daemon = True
-tUDPClient.start()
-
-time.sleep(1)
-
-#tTCPServer = threading.Thread(target=TCPServer)
-#tTCPServer.daemon = True
-#tTCPServer.start()
+#tUDPServer = threading.Thread(target=UDPServer)
+#tUDPServer.daemon = True
+#tUDPServer.start()
 #
 #time.sleep(5)
 #
-#tTCPClient = threading.Thread(target=TCPClient)
-#tTCPClient.daemon = True
-#tTCPClient.start()
+#tUDPClient = threading.Thread(target=UDPClient)
+#tUDPClient.daemon = True
+#tUDPClient.start()
+#
+#time.sleep(1)
+
+tTCPServer = threading.Thread(target=TCPServer)
+tTCPServer.daemon = True
+tTCPServer.start()
+
+time.sleep(5)
+
+tTCPClient = threading.Thread(target=TCPClient)
+tTCPClient.daemon = True
+tTCPClient.start()
 
 while threading.active_count() > 0:
     time.sleep(0.1)
