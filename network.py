@@ -4,8 +4,8 @@ import time
 from configuration import Configuration
 
 #tag:print
-def printdata(node, source, end, data):
-    print "P%d: %d-->%d data=[%s]" %( node, source, end, data)
+def printdata(head, node, source, end, data):
+    print "P%d: %s %d-->%d data=[%s]" %( node, head, source, end, data)
 
 #tag:udpclient
 def UDPClient():
@@ -20,7 +20,7 @@ def UDPClient():
         #print "UDP target IP:", UDP_IP
         #print "UDP target port:", UDP_PORT
         #print "UDP sending message:", MESSAGE
-        printdata(ID, ID, Configuration.getID( UDP_IP ) , MESSAGE )
+        printdata("UDP Send ", ID, ID, Configuration.getID( UDP_IP ) , MESSAGE )
         sock = socket.socket(socket.AF_INET, # Internet
                              socket.SOCK_DGRAM) # UDP
         sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
@@ -39,7 +39,7 @@ def UDPServer():
 
     while True:
         data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
-        printdata(ID, Configuration.getID( addr[0] ) , ID, data )
+        printdata("UDP Recv", ID, Configuration.getID( addr[0] ) , ID, data )
     print threading.currentThread().getName(), 'UDP Server Exiting. I am Node#', ID
     return
 
