@@ -1,4 +1,5 @@
 import threading
+import pdb
 import sys
 import select
 import socket
@@ -106,8 +107,7 @@ def TCPServer():
             else: 
                 # handle all other sockets 
                 data = s.recv(BUFFER_SIZE) 
-                print "PEERNAME", s.getpeername()
-                #printdata("TCP Recv", ID, Configuration.getID(addr[0]), ID, data)
+                printdata("TCP Recv", ID, Configuration.getID(s.getpeername()[0]), ID, data)
                 if data: 
                     s.send(data) 
                 else: 
