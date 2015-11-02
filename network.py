@@ -1,4 +1,6 @@
 import threading
+import sys
+import select
 import socket
 import time
 from configuration import Configuration
@@ -45,22 +47,30 @@ def UDPServer():
 
 #tag:tcpclient
 def TCPClient():
+    MYIP = Configuration.getPublicIP()
     ID = Configuration.getMyID()
     print threading.currentThread().getName(), 'TCP Client Starting. I am Node#', ID
 
     for ip in Configuration.IPTABLE:
+        if ip == MYIP: continue #Ignore itself
         TCP_IP = ip 
         TCP_PORT = Configuration.TCPPORT 
         BUFFER_SIZE = 1024
         MESSAGE = "Hello, World! from Node#%d" % ID
     
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((TCP_IP, TCP_PORT))
-        s.send(MESSAGE)
-        data = s.recv(BUFFER_SIZE)
-        s.close()
-      
-        printdata("TCP Send", ID, ID, Configuration.getID(TCP_IP), MESSAGE)
+        flag = True
+        while flag:
+            try:
+                s.connect((TCP_IP, TCP_PORT))
+                s.send(MESSAGE)
+                printdata("TCP Send", ID, ID, Configuration.getID(TCP_IP), MESSAGE)
+                data = s.recv(BUFFER_SIZE)
+                s.close()
+                flag = False
+            except:
+                printdata("TCP Reconnect", ID, ID, Configuration.getID(TCP_IP), "@_@")
+                time.sleep(1) #Reconnect delay 
     
     print threading.currentThread().getName(), 'TCP Client Exiting. I am Node #', ID
     return
@@ -68,25 +78,44 @@ def TCPClient():
 #tag:tcpserver
 def TCPServer():
     ID = Configuration.getMyID()
-    print threading.currentThread().getName(), 'TCP Server Starting. I am Node#', ID
-    TCP_IP = ''
+    MYIP = Configuration.getPublicIP()
+    print threading.currentThread().getName(), 'TCP Server Starting. I am Node#', ID, "ip=", MYIP
     TCP_PORT = Configuration.TCPPORT 
     BUFFER_SIZE = 1024  # Normally 1024, but we want fast response
 
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(('localhost', TCP_PORT))
-    print 'starting up on %s port %s' % ('localhost', TCP_PORT) 
-    s.listen(1)
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind(( socket.gethostname(), TCP_PORT))
+    server.listen(5) #At most 5 concurrent connection
+    input = [server, sys.stdin] 
+    running = 1 
+    while running: 
+        inputready,outputready,exceptready = select.select(input,[],[]) 
+    
+        for s in inputready: 
+            if s == server: 
+                # handle the server socket 
+                client, address = server.accept() 
+                print 'NODE#', ID,'<-----connect-----> NODE#' , Configuration.getID(address[0])
+                input.append(client) 
+    
+            elif s == sys.stdin: 
+                # handle standard input 
+                junk = sys.stdin.readline() 
+                running = 0 
+    
+            else: 
+                # handle all other sockets 
+                data = s.recv(BUFFER_SIZE) 
+                print "PEERNAME", s.getpeername()
+                #printdata("TCP Recv", ID, Configuration.getID(addr[0]), ID, data)
+                if data: 
+                    s.send(data) 
+                else: 
+                    print "LOST CONNECTION FROM ", s.getpeername()
+                    s.close() 
+                    input.remove(s) 
+    server.close()
 
-    conn, addr = s.accept()
-    print 'TCP NODE#', ID,' Connection address:' , addr
-    print 'NODE#', ID,'<-----connect-----> NODE#' , Configuration.getID(addr)
-    while 1:
-        data = conn.recv(BUFFER_SIZE)
-        if not data: break
-        printdata("TCP Recv", ID, Configuration.getID(addr[0]), ID, data)
-        conn.send(data)  # echo
-    conn.close()
     print threading.currentThread().getName(), 'TCP Server Exiting. I am NODE#', ID
     return
 
