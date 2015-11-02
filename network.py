@@ -8,7 +8,7 @@ from configuration import Configuration
 
 #tag:print
 def printdata(head, node, source, end, data):
-    print "NODE#%d: %s %d-->%d data=[%s]" %( node, head, source, end, data)
+    print "NODE#%d: %s %d=====>%d data=[%s]" %( node, head, source, end, data)
 
 #tag:udpclient
 def UDPClient():
@@ -87,7 +87,7 @@ def TCPServer():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(( socket.gethostname(), TCP_PORT))
     server.listen(5) #At most 5 concurrent connection
-    input = [server, sys.stdin] 
+    input = [server] 
     running = 1 
     while running: 
         inputready,outputready,exceptready = select.select(input,[],[]) 
@@ -96,13 +96,8 @@ def TCPServer():
             if s == server: 
                 # handle the server socket 
                 client, address = server.accept() 
-                print 'NODE#', ID,'<-----connect-----> NODE#' , Configuration.getID(address[0])
                 input.append(client) 
-    
-            elif s == sys.stdin: 
-                # handle standard input 
-                junk = sys.stdin.readline() 
-                running = 0 
+                print 'NODE#', ID,'<-----connect-----> NODE#' , Configuration.getID(address[0]) , "(", len(input) - 2, "over", Configuration.getN() - 1, "connections)"
     
             else: 
                 # handle all other sockets 
