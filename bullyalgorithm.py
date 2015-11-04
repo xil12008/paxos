@@ -1,3 +1,4 @@
+from threading import Timer
 import threading
 import pdb
 import sys
@@ -38,6 +39,11 @@ def TCPSend(dest, content):
     #print threading.currentThread().getName(), 'TCP Client Exiting Successfully. I am Node #', ID
     return 
 
+def bcastCoordinator():
+    if winFlag == False: return
+    for i in range(1, Configuration.getN() + 1):
+        TCPSend(i, "Coordinator")
+
 #tag:tcpserver
 def TCPServer():
     ID = Configuration.getMyID()
@@ -66,26 +72,26 @@ def TCPServer():
                 # handle all other sockets 
                 data = s.recv(BUFFER_SIZE) 
                 if data: 
-                    printdata("TCP Recv", ID, Configuration.getID(s.getpeername()[0]), ID, data)
+                    peerID =  Configuration.getID( s.getpeername()[0] )
+                    printdata("TCP Recv", ID, ID, peerID, data)
                     #s.send(data) 
                     #forward to the next node
                     time.sleep(1)
-                    if _state_ == "NULL":
-                      TCPSend( ID % N + 1, data + ",%d" % ID )
-                      _state = "1"
-                    elif _state_ == "1":
-                      if data[0] == "L": 
-                        print "Leader=", data[1:]
-                        _state_ = "Love huihui"
-                      msgIDs = [int(x) for x in data.split(",")];
-                      if ID == max(msgIDs):
-                        TCPSend( ID % N + 1, "L%d" % ID)
-                        _state_ = "2"
-                      else:
-                        TCPSend( ID % N + 1, data)
-                    elif _state_ == "2":
-                      printdata("Ring Algorithm Exit Successfully", ID, Configuration.getID(s.getpeername()[0]), ID, data)
-                      _state_ = "3"
+                    if data[0] == 'C': #Coordinate
+                        print "NODE #", ID, "Leader is", peerID
+                    elif data[0] == 'E': #Election
+                        if peerID < ID:
+                            TCPSend( peerID, "OK" )
+                            for bi in range(ID + 1, Configuration.getN() + 1):
+                                TCPSend( bi, "ELECTION") 
+                            global winFlag
+                            winFlag = True 
+                            t = Timer(20.0, bcastCoordinator)
+                            t.start()
+                    elif data[0] == 'O': #OK
+                        print "NODE #", ID, "Gave up. (Receive OK from", peerID, ")"
+                        winFlag = False
+                        
                 else: 
                     s.close() 
                     input.remove(s) 
