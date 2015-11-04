@@ -139,7 +139,10 @@ while True:
             if i == ID: continue
             tmp = 1 - TCPSend(i, "hi")
             if alive[i] != tmp: 
-                print "NODE", ID, " >:-( NODE", i, "is dead"
+                if alive[i] > tmp:
+                    print "NODE", ID, " >:-( NODE", i, "is dead"
+                elif alive[i] < tmp:
+                    print "NODE", ID, " ^-^ NODE", i, "is alive"
                 alive[i] = tmp 
                 holdElection( Configuration.getMyID() )
     finally:
