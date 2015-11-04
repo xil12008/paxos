@@ -47,6 +47,8 @@ def TCPServer():
     TCP_PORT = Configuration.TCPPORT 
     BUFFER_SIZE = 1024  # Normally 1024, but we want fast response
 
+    _state_ = "NULL"
+
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(( socket.gethostname(), TCP_PORT))
     server.listen(5) #At most 5 concurrent connection
@@ -68,7 +70,22 @@ def TCPServer():
                     #s.send(data) 
                     #forward to the next node
                     time.sleep(1)
-                    TCPSend( ID % N + 1, data )
+                    if _state_ == "NULL":
+                      TCPSend( ID % N + 1, data + ",%d" % ID )
+                      _state = "1"
+                    elif _state_ == "1":
+                      if data[0] == "L": 
+                        print "Leader=", data[1:]
+                        _state_ = "Love huihui"
+                      msgIDs = [int(x) for x in data.split(",")];
+                      if ID == max(msgIDs):
+                        TCPSend( ID % N + 1, "L%d" % ID)
+                        _state_ = "2"
+                      else:
+                        TCPSend( ID % N + 1, data)
+                    elif _state_ == "2":
+                      printdata("Ring Algorithm Exit Successfully", ID, Configuration.getID(s.getpeername()[0]), ID, data)
+                      _state_ = "3"
                 else: 
                     s.close() 
                     input.remove(s) 
