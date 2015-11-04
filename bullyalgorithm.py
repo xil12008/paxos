@@ -43,15 +43,19 @@ def TCPSend(dest, content):
 
 def bcastCoordinator():
     global winFlag
-    if winFlag == False: return
+    if winFlag == False:
+       #print "return because False"
+       return
+    print "^_^----I am the leader"
     for i in range(1, Configuration.getN() + 1):
         TCPSend(i, "Coordinator")
 
 def holdElection(ID):
-    for bi in range(ID + 1, Configuration.getN() + 1):
-        TCPSend( bi, "ELECTION") 
     global winFlag
     winFlag = True 
+    #print "True"
+    for bi in range(ID + 1, Configuration.getN() + 1):
+        TCPSend( bi, "ELECTION") 
     t = Timer(20.0, bcastCoordinator)
     t.start()
 
@@ -98,6 +102,7 @@ def TCPServer():
                         print "NODE #", ID, "Gave up. (Receive OK from", peerID, ")"
                         global winFlag
                         winFlag = False
+                        #print "False"
                 else: 
                     s.close() 
                     input.remove(s) 
