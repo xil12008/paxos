@@ -26,7 +26,7 @@ def TCPSend(dest, content):
     count = 0;
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     flag = True
-    while flag and count < 10:
+    while flag and count < 5:
         try:
             s.connect((TCP_IP, TCP_PORT))
             s.send(content)
@@ -112,8 +112,11 @@ tTCPServer.start()
 
 time.sleep(5)
 
-ID = Configuration.getMyID()
-holdElection(ID)
+userinput = raw_input("Press A to hold election...")
+if userinput == "A":
+  print "hold election now"
+  ID = Configuration.getMyID()
+  holdElection(ID)
 
 while threading.active_count() > 0:
     time.sleep(0.1)
