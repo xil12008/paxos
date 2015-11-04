@@ -18,7 +18,7 @@ def TCPSend(dest, content):
        return
     TCP_PORT = Configuration.TCPPORT 
     ID = Configuration.getMyID()
-    print threading.currentThread().getName(), 'TCP Client Starting. I am Node#', ID
+    #print threading.currentThread().getName(), 'TCP Client Starting. I am Node#', ID
     BUFFER_SIZE = 1024
     MESSAGE = "Hello, World! from Node#%d" % ID
     
@@ -29,13 +29,13 @@ def TCPSend(dest, content):
             s.connect((TCP_IP, TCP_PORT))
             s.send(content)
             printdata("TCP Send", ID, ID, Configuration.getID(TCP_IP), content)
-            data = s.recv(BUFFER_SIZE)
+            #data = s.recv(BUFFER_SIZE)
             s.close()
             flag = False
         except:
             printdata("TCP Client Reconnect", ID, ID, Configuration.getID(TCP_IP), "@_@")
             time.sleep(2) #Reconnect delay 
-    print threading.currentThread().getName(), 'TCP Client Exiting Successfully. I am Node #', ID
+    #print threading.currentThread().getName(), 'TCP Client Exiting Successfully. I am Node #', ID
     return 
 
 #tag:tcpserver
@@ -63,10 +63,11 @@ def TCPServer():
             else: 
                 # handle all other sockets 
                 data = s.recv(BUFFER_SIZE) 
-                printdata("TCP Recv", ID, Configuration.getID(s.getpeername()[0]), ID, data)
                 if data: 
+                    printdata("TCP Recv", ID, Configuration.getID(s.getpeername()[0]), ID, data)
                     #s.send(data) 
                     #forward to the next node
+                    time.sleep(1)
                     TCPSend( ID % N + 1, data )
                 else: 
                     s.close() 
