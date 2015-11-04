@@ -43,6 +43,7 @@ def TCPSend(dest, content):
 #tag:tcpserver
 def TCPServer():
     ID = Configuration.getMyID()
+    N = Configuration.getN()
     MYIP = Configuration.getPublicIP()
     print threading.currentThread().getName(), 'TCP Server Starting. I am Node#', ID, "ip=", MYIP
     TCP_PORT = Configuration.TCPPORT 
@@ -66,7 +67,9 @@ def TCPServer():
                 data = s.recv(BUFFER_SIZE) 
                 printdata("TCP Recv", ID, Configuration.getID(s.getpeername()[0]), ID, data)
                 if data: 
-                    s.send(data) 
+                    #s.send(data) 
+                    #forward to the next node
+                    TCPSend( ID % N + 1, data )
                 else: 
                     s.close() 
                     input.remove(s) 
