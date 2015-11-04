@@ -1,4 +1,4 @@
-from threading import Timer
+from threading import Timer, Thread, Lock
 import threading
 import pdb
 import sys
@@ -7,7 +7,6 @@ import socket
 import time
 from configuration import Configuration
 
-winFlag = True #Default is that a process will thought it is the highest-ID alive process
 
 #tag:print
 def printdata(head, node, source, end, data):
@@ -26,7 +25,7 @@ def TCPSend(dest, content):
     count = 0;
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     flag = True
-    while flag and count < 5:
+    while flag and count < 1: 
         try:
             s.connect((TCP_IP, TCP_PORT))
             s.send(content)
@@ -36,11 +35,14 @@ def TCPSend(dest, content):
             flag = False
         except:
             printdata("TCP Client Reconnect", ID, ID, Configuration.getID(TCP_IP), "@_@_~:" + content)
-            time.sleep(2) #Reconnect delay 
+            time.sleep(0.5) #Reconnect delay 
             count += 1
     #print threading.currentThread().getName(), 'TCP Client Exiting Successfully. I am Node #', ID
-    return 
-
+    if count < 1:
+        return 0 #exit successfully 
+    else:
+        return 1 #sending msg failed
+    
 def bcastCoordinator():
     global winFlag
     if winFlag == False:
@@ -51,6 +53,7 @@ def bcastCoordinator():
         TCPSend(i, "Coordinator")
 
 def holdElection(ID):
+    print "NODE#", ID, "holds election now"
     global winFlag
     winFlag = True 
     #print "True"
@@ -111,17 +114,41 @@ def TCPServer():
     print threading.currentThread().getName(), 'TCP Server Exiting. I am NODE#', ID
     return
 
+#============================ main =========================#
+
+winFlag = True #Default is that a process will thought it is the highest-ID alive process
+alive = [1 for _ in range(Configuration.getN() + 1)]
+alivemutex = Lock()
+
 tTCPServer = threading.Thread(target=TCPServer)
 tTCPServer.daemon = True
 tTCPServer.start()
 
+ID = Configuration.getMyID()
+
 time.sleep(5)
 
-userinput = raw_input("Press A to hold election...")
-if userinput == "A":
-  print "hold election now"
-  ID = Configuration.getMyID()
-  holdElection(ID)
+#ID = Configuration.getMyID()
+#holdElection(ID)
+
+while True:
+    alivemutex.acquire()
+    try:
+       print "Check every one alive" 
+       for i in range(1, Configuration.getN() + 1):
+            if i == ID: continue
+            tmp = 1 - TCPSend(i, "hi")
+            if alive[i] != tmp: 
+                print "NODE", ID, " >:-( NODE", i, "is dead"
+                alive[i] = tmp 
+                holdElection( Configuration.getMyID() )
+    finally:
+        alivemutex.release()
+        time.sleep(5)
+
+#userinput = raw_input("Press A to hold election...")
+#if userinput == "A":
+#    print "hold election now"
 
 while threading.active_count() > 0:
     time.sleep(0.1)
