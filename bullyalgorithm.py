@@ -7,6 +7,8 @@ import socket
 import time
 from configuration import Configuration
 
+winFlag = True #Default is that a process will thought it is the highest-ID alive process
+
 #tag:print
 def printdata(head, node, source, end, data):
     print "NODE#%d: %s %d=====>%d data=[%s]" %( node, head, source, end, data)
@@ -21,11 +23,10 @@ def TCPSend(dest, content):
     ID = Configuration.getMyID()
     #print threading.currentThread().getName(), 'TCP Client Starting. I am Node#', ID
     BUFFER_SIZE = 1024
-    MESSAGE = "Hello, World! from Node#%d" % ID
-    
+    count = 0;
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     flag = True
-    while flag:
+    while flag and count < 10:
         try:
             s.connect((TCP_IP, TCP_PORT))
             s.send(content)
@@ -34,12 +35,14 @@ def TCPSend(dest, content):
             s.close()
             flag = False
         except:
-            printdata("TCP Client Reconnect", ID, ID, Configuration.getID(TCP_IP), "@_@")
+            printdata("TCP Client Reconnect", ID, ID, Configuration.getID(TCP_IP), "@_@_~:" + content)
             time.sleep(2) #Reconnect delay 
+            count += 1
     #print threading.currentThread().getName(), 'TCP Client Exiting Successfully. I am Node #', ID
     return 
 
 def bcastCoordinator():
+    global winFlag
     if winFlag == False: return
     for i in range(1, Configuration.getN() + 1):
         TCPSend(i, "Coordinator")
@@ -93,6 +96,7 @@ def TCPServer():
                             holdElection(ID)
                     elif data[0] == 'O': #OK
                         print "NODE #", ID, "Gave up. (Receive OK from", peerID, ")"
+                        global winFlag
                         winFlag = False
                         
                 else: 
