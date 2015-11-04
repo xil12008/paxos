@@ -84,7 +84,7 @@ def TCPServer():
                 data = s.recv(BUFFER_SIZE) 
                 if data: 
                     peerID =  Configuration.getID( s.getpeername()[0] )
-                    printdata("TCP Recv", ID, ID, peerID, data)
+                    printdata("TCP Recv", ID, peerID, ID, data)
                     #s.send(data) 
                     #forward to the next node
                     time.sleep(1)
@@ -98,7 +98,6 @@ def TCPServer():
                         print "NODE #", ID, "Gave up. (Receive OK from", peerID, ")"
                         global winFlag
                         winFlag = False
-                        
                 else: 
                     s.close() 
                     input.remove(s) 
