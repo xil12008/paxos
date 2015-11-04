@@ -30,7 +30,8 @@ class Configuration:
     
     @staticmethod 
     def getIP(nodeID):
-        if(nodeID >= len(Configuration.IP_Table)): 
+        nodeID -= 1
+        if(nodeID >= len(Configuration.IPTABLE)): 
             print "Sorry, nodeID too large"
             return None
         return Configuration.IPTABLE[nodeID]

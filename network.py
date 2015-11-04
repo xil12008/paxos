@@ -46,6 +46,36 @@ def UDPServer():
     print threading.currentThread().getName(), 'UDP Server Exiting. I am Node#', ID
     return
 
+def TCPSend(dest, content):
+    TCP_IP = Configuration.getIP(dest) 
+    MYIP = Configuration.getPublicIP()
+    if TCP_IP == MYIP:
+       print "TCPSend() terminates. (Error: sending to itself)" #Ignore itself
+       return
+    TCP_PORT = Configuration.TCPPORT 
+    ID = Configuration.getMyID()
+    print threading.currentThread().getName(), 'TCP Client Starting. I am Node#', ID
+    BUFFER_SIZE = 1024
+    MESSAGE = "Hello, World! from Node#%d" % ID
+    
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    flag = True
+    while flag:
+        try:
+            s.connect((TCP_IP, TCP_PORT))
+            s.send(content)
+            printdata("TCP Send", ID, ID, Configuration.getID(TCP_IP), content)
+            data = s.recv(BUFFER_SIZE)
+            s.close()
+            flag = False
+        except:
+            printdata("TCP Client Reconnect", ID, ID, Configuration.getID(TCP_IP), "@_@")
+            time.sleep(1) #Reconnect delay 
+    time.sleep(5)
+    
+    print threading.currentThread().getName(), 'TCP Client Exiting Successfully. I am Node #', ID
+    return 
+
 #tag:tcpclient
 def TCPClient():
     MYIP = Configuration.getPublicIP()
@@ -136,9 +166,14 @@ tTCPServer.start()
 
 time.sleep(5)
 
-tTCPClient = threading.Thread(target=TCPClient)
-tTCPClient.daemon = True
-tTCPClient.start()
+#tTCPClient = threading.Thread(target=TCPClient)
+#tTCPClient.daemon = True
+#tTCPClient.start()
+
+TCPSend(1, "Love")
+TCPSend(2, "Faith")
+TCPSend(1, "Hope")
+TCPSend(2, "Love is the most important")
 
 while threading.active_count() > 0:
     time.sleep(0.1)
