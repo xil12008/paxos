@@ -34,9 +34,7 @@ def TCPSend(dest, content):
             flag = False
         except:
             printdata("TCP Client Reconnect", ID, ID, Configuration.getID(TCP_IP), "@_@")
-            time.sleep(1) #Reconnect delay 
-    time.sleep(5)
-    
+            time.sleep(2) #Reconnect delay 
     print threading.currentThread().getName(), 'TCP Client Exiting Successfully. I am Node #', ID
     return 
 
