@@ -44,6 +44,14 @@ def bcastCoordinator():
     for i in range(1, Configuration.getN() + 1):
         TCPSend(i, "Coordinator")
 
+def holdElection():
+    for bi in range(ID + 1, Configuration.getN() + 1):
+        TCPSend( bi, "ELECTION") 
+    global winFlag
+    winFlag = True 
+    t = Timer(20.0, bcastCoordinator)
+    t.start()
+
 #tag:tcpserver
 def TCPServer():
     ID = Configuration.getMyID()
@@ -82,12 +90,7 @@ def TCPServer():
                     elif data[0] == 'E': #Election
                         if peerID < ID:
                             TCPSend( peerID, "OK" )
-                            for bi in range(ID + 1, Configuration.getN() + 1):
-                                TCPSend( bi, "ELECTION") 
-                            global winFlag
-                            winFlag = True 
-                            t = Timer(20.0, bcastCoordinator)
-                            t.start()
+                            holdElection()
                     elif data[0] == 'O': #OK
                         print "NODE #", ID, "Gave up. (Receive OK from", peerID, ")"
                         winFlag = False
@@ -106,7 +109,7 @@ tTCPServer.start()
 
 time.sleep(5)
 
-TCPSend(2, "Faith")
+holdElection()
 
 while threading.active_count() > 0:
     time.sleep(0.1)
