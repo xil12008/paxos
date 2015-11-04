@@ -128,8 +128,8 @@ ID = Configuration.getMyID()
 
 time.sleep(5)
 
-#ID = Configuration.getMyID()
-#holdElection(ID)
+ID = Configuration.getMyID()
+holdElection(ID)
 
 while True:
     alivemutex.acquire()
