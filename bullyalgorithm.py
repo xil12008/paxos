@@ -49,6 +49,13 @@ def bcastCoordinator():
        #print "return because False"
        return
     print "^_^----I am the leader"
+    global leaderlock
+    global leader
+    leaderlock.acquire()
+    try: 
+        leader = MYID
+    finally:
+        leaderlock.release()
     for i in range(1, Configuration.getN() + 1):
         TCPSend(i, "Coordinator")
 
@@ -97,6 +104,13 @@ def TCPServer():
                     time.sleep(1)
                     if data[0] == 'C': #Coordinate
                         print "NODE #", ID, "Leader is", peerID
+                        global leaderlock
+                        global leader
+                        leaderlock.acquire()
+                        try: 
+                            leader = peerID
+                        finally:
+                            leaderlock.release()
                     elif data[0] == 'E': #Election
                         if peerID < ID:
                             TCPSend( peerID, "OK" )
@@ -120,21 +134,23 @@ winFlag = True #Default is that a process will thought it is the highest-ID aliv
 alive = [1 for _ in range(Configuration.getN() + 1)]
 alivemutex = Lock()
 
+leader = 0 #unknown leader 
+leaderlock = Lock()
+
 tTCPServer = threading.Thread(target=TCPServer)
 tTCPServer.daemon = True
 tTCPServer.start()
 
 ID = Configuration.getMyID()
+MYID = Configuration.getMyID()
 
 time.sleep(5)
-
-ID = Configuration.getMyID()
 holdElection(ID)
 
 while True:
     alivemutex.acquire()
     try:
-       print "Check every one alive" 
+       print "Check every one alive. My leader is", leader 
        for i in range(1, Configuration.getN() + 1):
             if i == ID: continue
             tmp = 1 - TCPSend(i, "hi")
