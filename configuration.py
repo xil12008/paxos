@@ -9,6 +9,11 @@ class Configuration:
     IPTABLE = ['52.32.80.147','52.33.9.72','52.23.155.239', '54.193.79.49']
     UDPPORT = 5005 #UDP PORT
     TCPPORT = 12345 #TCP PORT
+    
+    ACCEPTOR_PORT = 12346
+    LEADER_PORT = 12347
+    BULLY_PORT = 5005
+    
   
     @staticmethod
     def getN():
