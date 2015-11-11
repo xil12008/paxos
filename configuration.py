@@ -14,6 +14,8 @@ class Configuration:
     LEADER_PORT = 12347
     BULLY_PORT = 5005
     
+    init_accNum = -99999
+    init_accVal = -99999
   
     @staticmethod
     def getN():
