@@ -17,6 +17,7 @@ class Configuration:
     init_accNum = -99999
     init_accVal = -99999
     init_maxPrepare = -99999
+    init_value = "Nothing"
   
     @staticmethod
     def getN():
