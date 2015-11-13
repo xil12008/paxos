@@ -1,9 +1,10 @@
 import socket
+from configuration import Configuration as conf
 
 class UDP:
-    def __init__(self, ports, timeout=10):
+    def __init__(self, timeout=10):
         self.timeout = timeout
-        self.ports = ports
+        self.ports = conf.PORTS
 
     def send(self, UDP_IP, type , msg):
         sock = socket.socket(socket.AF_INET, # Internet
@@ -22,8 +23,8 @@ class UDP:
         return data
 
 def test():
-    ports = {"prepare":12345, "promise":12346, "accept":12347, "ack":12348, "commit":12349}
-    udp = UDP(ports)
+    #ports = {"prepare":12345, "promise":12346, "accept":12347, "ack":12348, "commit":12349}
+    udp = UDP()
     msg = {"slot":0,"accNum":1, "accVal":"val"}
     udp.send("localhost", "promise", str(msg))
     udp.send("localhost", "ack", str(msg))

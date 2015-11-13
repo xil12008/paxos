@@ -2,9 +2,9 @@ import random
 import udp
 
 class Proposer:
-    def __init__(self, ports, opt):
+    def __init__(self, opt):
         self.acceptors_ip = ["localhost"]
-        self.UDP = udp.UDP(ports)
+        self.UDP = udp.UDP()
         self.acceptors_num = len(self.acceptors_ip)
         self.slot = self.getSlot()
         self.m = self.getMaxPrepare()
@@ -113,8 +113,8 @@ class Proposer:
         self.phase2()
 
 def test():
-    ports = {"prepare":12345, "promise":12346, "accept":12345, "ack":12348, "commit":12345, "request":12345, "update":12347}
-    proposer = Proposer(ports,random.randint(0,1)==0)
+    #ports = {"prepare":12345, "promise":12346, "accept":12345, "ack":12348, "commit":12345, "request":12345, "update":12347}
+    proposer = Proposer(random.randint(0,1)==0)
     proposer.allPhases()
 
 test()
