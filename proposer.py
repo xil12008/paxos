@@ -62,7 +62,7 @@ class Proposer:
     def promise(self):
         majority = []
         for acceptor_ip in self.acceptors_ip:
-            data,addr = self.UDP.recv(acceptor_ip, "promise")
+            data,addr = self.UDP.recv('', "promise")
             if data == None: continue
             msg = self.translateMsg(data)
             
@@ -83,7 +83,7 @@ class Proposer:
     def ack(self):
         majority = []
         for acceptor_ip in self.acceptors_ip:
-            data,addr = self.UDP.recv(acceptor_ip, "ack")
+            data,addr = self.UDP.recv('', "ack")
             if data == None: continue
             msg = self.translateMsg(data)
             if msg["msgname"] != "ack": continue
