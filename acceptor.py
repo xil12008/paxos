@@ -7,7 +7,7 @@ class Acceptor:
         self.maxPrepare = 0
         self.accNum = 0
         self.accVal = None
-        self.UDP = udp.UDP(10)
+        self.UDP = udp.UDP()
 
     def findProposer(self):
         for ip in self.acceptor_ips:

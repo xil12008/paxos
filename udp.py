@@ -2,7 +2,7 @@ import socket
 from configuration import Configuration as conf
 
 class UDP:
-    def __init__(self, timeout=3):
+    def __init__(self, timeout=10):
         self.timeout = timeout
         self.ports = conf.PORTS
 
