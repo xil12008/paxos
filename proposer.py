@@ -52,11 +52,11 @@ class Proposer:
                 val = msg["accVal"]
         self.v = val
 
-    def translateMsg(self, data){
+    def translateMsg(self, data):
         data = eval(data)
         msg = {"msgname":data["msgname"], "entryID":data["entryID"], "accNum":data["msglist"][0], "accVal":data["msglist"][1]}
         return msg
-    }
+    
 
     def promise(self):
         majority = []
