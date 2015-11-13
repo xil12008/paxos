@@ -37,8 +37,8 @@ def acceptor_udp_server():
     while True:
         data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
         peerID = Configuration.getID( addr[0] )
-        #try:
-        json_object = json.loads(data.strip())
+        #try
+        json_object = transferInput(data)
         if json_object['msgname'] == "commit": 
            onCommit(json_object['entryID'], json_object['msglist'], peerID) 
            printdata("Acceptor Recv Commit", ID, peerID, ID, data)
@@ -52,6 +52,19 @@ def acceptor_udp_server():
         #    print "Can't parse data:", data, sys.exc_info()[0]
     print threading.currentThread().getName(), ' Acceptor UDP Server Exiting. I am Node#', ID
     return
+
+def transferInput(data):
+    msg_tmp = eval(data.strip())
+    json_object = {}
+    json_object["msgname"] = msg_tmp["msgname"]
+    json_object["entryID"] = msg_tmp["entryID"]
+    if json_object["msgname"] == "commit":
+        json_object["msglist"] = [ msg_tmp["val"] ]
+    elif json_object['msgname'] == "accept":
+        json_object["msglist"] = [ msg_tmp["m"], msg_tmp["v"] ]
+    elif json_object['msgname'] == "prepare":
+        json_object["msglist"] = [ msg_tmp["m"] ]
+    return json_object
 
 def firstRun():
     locallog = readlog() 
@@ -134,14 +147,11 @@ tAcceptor.start()
 
 time.sleep(2)
 
-#udp_send( 1, "commit", ["value hahaha"] ) 
-#udp_send( 1, "commit", ["value hahaha"], Configuration.getMyID() ) 
-udp_send( 3, "prepare", ["4"] , Configuration.getMyID()) 
-udp_send( 3, "prepare", ["2"] , Configuration.getMyID()) 
-udp_send( 3, "prepare", ["5"] , Configuration.getMyID()) 
-#udp_send( 3, "prepare", ["2"] ) 
-udp_send( 3, "accept", ["5", "my test value"] , Configuration.getMyID()) 
-udp_send( 3, "commit", ["my test value"] , Configuration.getMyID()) 
+#udp_send( 3, "prepare", ["4"] , Configuration.getMyID()) 
+#udp_send( 3, "prepare", ["2"] , Configuration.getMyID()) 
+#udp_send( 3, "prepare", ["5"] , Configuration.getMyID()) 
+#udp_send( 3, "accept", ["5", "my test value"] , Configuration.getMyID()) 
+#udp_send( 3, "commit", ["my test value"] , Configuration.getMyID()) 
 
 while threading.active_count() > 0:
     time.sleep(0.1)
