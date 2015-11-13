@@ -1,9 +1,10 @@
 import random
 import udp
+from configuration import Configuration as conf
 
 class Proposer:
     def __init__(self, opt):
-        self.acceptors_ip = ["localhost"]
+        self.acceptors_ip = conf.IPTABLE
         self.UDP = udp.UDP()
         self.acceptors_num = len(self.acceptors_ip)
         self.slot = self.getSlot()
