@@ -7,7 +7,7 @@ class Proposer:
         self.acceptors_ip = conf.IPTABLE
         self.UDP = udp.UDP()
         self.acceptors_num = len(self.acceptors_ip)
-        self.slot = self.getSlot()
+        self.entryID = self.getEntryID()
         self.m = self.getMaxPrepare()
         self.v = self.getValue()
         self.opt = opt
@@ -19,12 +19,12 @@ class Proposer:
             maxPrepare = 0
             count = 0
             for acceptor_ip in self.acceptors_ip:
-                send_msg = {"name":"request", "slot":self.slot}
-                self.UDP.send(acceptor_ip, send_msg["name"], str(send_msg))
+                send_msg = {"msgname":"request", "entryID":self.entryID}
+                self.UDP.send(acceptor_ip, send_msg["msgname"], str(send_msg))
                 data = self.UDP.recv(acceptor_ip, "update")
                 if data == None: break
                 recv_msg = eval(data)
-                if recv_msg["name"]!="update": break
+                if recv_msg["msgname"]!="update": break
                 maxPrepare = max(maxPrepare, recv_msg["maxPrepare"])
                 count += 1
             if count==self.acceptors_num: break
@@ -35,13 +35,13 @@ class Proposer:
     def getValue(self):
         return "dummy" #toDo
     
-    def getSlot(self):
+    def getEntryID(self):
         return 0 #toDo
     
     def prepare(self):
-        msg = {"slot":self.slot, "name":"prepare", "id":self.m}
+        msg = {"entryID":self.entryID, "msgname":"prepare", "id":self.m}
         for acceptor_ip in self.acceptors_ip:
-            self.UDP.send(acceptor_ip, msg["name"], str(msg))
+            self.UDP.send(acceptor_ip, msg["msgname"], str(msg))
 
     def select_val(self, majority):
         highest_num=0
@@ -52,13 +52,21 @@ class Proposer:
                 val = msg["accVal"]
         self.v = val
 
+    def translateMsg(self, data){
+        data = eval(data)
+        msg = {"msgname":data["msgname"], "entryID":data["entryID"], "accNum":data["msglist"][0], "accVal":data["msglist"][1]}
+        return msg
+    }
+
     def promise(self):
         majority = []
         for acceptor_ip in self.acceptors_ip:
             data = self.UDP.recv(acceptor_ip, "promise")
             if data == None: continue
-            msg = eval(data)
-            if msg["name"] != "promise": continue
+            #msg = eval(data)
+            msg = translateMsg(data)
+            
+            if msg["msgname"] != "promise": continue
             if msg["accNum"] >= self.m : continue
             
             majority.append(msg)
@@ -68,17 +76,19 @@ class Proposer:
         else : return True
     
     def accept(self):
-        msg = {"slot":self.slot, "name":"accept", "id":self.m, "val":self.v}
+        msg = {"entryID":self.entryID, "msgname":"accept", "id":self.m, "val":self.v}
         for acceptor_ip in self.acceptors_ip:
-            self.UDP.send(acceptor_ip, msg["name"], str(msg))
+            self.UDP.send(acceptor_ip, msg["msgname"], str(msg))
     
     def ack(self):
         majority = []
         for acceptor_ip in self.acceptors_ip:
             data = self.UDP.recv(acceptor_ip, "ack")
             if data == None: continue
-            msg = eval(data)
-            if msg["name"] != "ack": continue
+            #msg = eval(data)
+            msg = translateMsg(data)
+            
+            if msg["msgname"] != "ack": continue
             if msg["accNum"] != self.m : continue
             if msg["accVal"] != self.v : continue
             majority.append(msg)
@@ -87,9 +97,9 @@ class Proposer:
         else : return True
     
     def commit(self):
-        msg = {"slot":self.slot, "name":"commit", "id":self.m, "val":self.v}
+        msg = {"entryID":self.entryID, "msgname":"commit", "id":self.m, "val":self.v}
         for acceptor_ip in self.acceptors_ip:
-            self.UDP.send(acceptor_ip, msg["name"], str(msg))
+            self.UDP.send(acceptor_ip, msg["msgname"], str(msg))
     
     def phase1(self):
         self.m +=1
