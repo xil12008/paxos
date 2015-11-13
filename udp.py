@@ -14,11 +14,11 @@ class UDP:
     def recv(self, UDP_IP, type):
         sock = socket.socket(socket.AF_INET, # Internet
                      socket.SOCK_DGRAM) # UDP
-        sock.bind((UDP_IP, self.ports[type]))
-        sock.settimeout(self.timeout)
         try:
+            sock.bind((UDP_IP, self.ports[type]))
+            sock.settimeout(self.timeout)
             data,addr = sock.recvfrom(1024) # buffer size is 1024 bytes
-        except socket.timeout:
+        except socket.error:
             data = None
         return data
 
