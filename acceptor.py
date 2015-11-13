@@ -20,8 +20,8 @@ class Acceptor:
     def run(self):
         while(True):
             data, addr = self.UDP.recv('', "prepare")
-            self.proposer_ip = '127.0.0.1'
             if data == None : continue
+            self.proposer_ip = addr[0]
             recv_msg = eval(data)
             print recv_msg
             '''
