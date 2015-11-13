@@ -9,15 +9,25 @@ import time
 import csv
 from configuration import Configuration
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 #tag:print
 def printdata(head, node, source, end, data):
-    print "NODE#%d: %s %d=====>%d data=[%s]" %( node, head, source, end, data)
+    print bcolors.OKBLUE + "NODE#%d: %s %d=====>%d data=[%s]" %( node, head, source, end, data) + bcolors.ENDC
 
 #tag:udpserver
 def acceptor_udp_server():
     ID = Configuration.getMyID()
     #UDP_PORT = Configuration.ACCEPTOR_PORT
-    UDP_PORT = Configuration.ports["prepare"]
+    UDP_PORT = Configuration.PORTS["prepare"]
     print threading.currentThread().getName(), ' Acceptor UDP Server Starting. I am Node#', ID, "at port", UDP_PORT
 
     sock = socket.socket(socket.AF_INET, # Internet
@@ -55,21 +65,21 @@ def firstRun():
     savelog(locallog)
 
 def onPrepare(entryID, msglist, peerID):
-    print "onPrepare: entryID=", entryID, ", m=", msglist, "from NODE", peerID
+    print bcolors.BOLD + "onPrepare:" + bcolors.ENDC + " entryID=", entryID, ", m=", msglist, "from NODE", peerID
     m = int(msglist[0])
     entryID = str(entryID)
     locallog = readlog()
     if ( m > int(locallog[entryID]["maxPrepare"]) ):
         locallog[entryID]["maxPrepare"] = m
         send_msglist = [locallog[entryID]["accNum"], locallog[entryID]["accVal"]]
-        print "send promise"
+        print bcolors.WARNING + "send promise" + bcolors.ENDC
         udp_send(entryID, "promise", send_msglist, peerID) 
     else:
-        print "rejected"
+        print bcolors.FAIL + "rejected" + bcolors.ENDC
     savelog(locallog)
 
 def onAccept(entryID, msglist, peerID):
-    print "onAccept: entryID=", entryID, ", m:v=", msglist, " from NODE", peerID
+    print bcolors.BOLD + "onAccept:" + bcolors.ENDC + " entryID=", entryID, ", m:v=", msglist, " from NODE", peerID
     m = int(msglist[0])
     entryID = str(entryID)
     v = msglist[1]
@@ -78,14 +88,14 @@ def onAccept(entryID, msglist, peerID):
         locallog[entryID]['accNum'] = m
         locallog[entryID]['accVal'] = v 
         send_msglist = [locallog[entryID]['accNum'], locallog[entryID]['accVal']]
-        print "send ack"
+        print bcolors.WARNING + "send ack" + bcolors.ENDC
         udp_send(entryID, "ack", send_msglist, peerID) 
     else:
-        print "rejected"
+        print bcolors.FAIL + "rejected" + bcolors.ENDC
     savelog(locallog)
 
 def onCommit(entryID, msglist, peerID):
-    print "onCommit: entryID=", entryID, ", v=", msglist, "from NODE", peerID
+    print bcolors.BOLD + "onCommit:" + bcolors.ENDC + " entryID=", entryID, ", v=", msglist, "from NODE", peerID
     locallog = readlog()
     locallog[entryID]["value"] = msglist[0]
     savelog(locallog)
@@ -93,13 +103,13 @@ def onCommit(entryID, msglist, peerID):
 def udp_send(entryID, msgname, msglist, peerID): 
     ID = Configuration.getMyID()
     UDP_IP = Configuration.getIP(peerID) 
-    UDP_PORT = Configuration.ports[msgname]
+    UDP_PORT = Configuration.PORTS[msgname]
     msg = {}
     msg['msgname'] = msgname 
     msg['entryID'] = str( entryID ) 
     msg['msglist'] = msglist 
     MESSAGE = json.dumps(msg) 
-    #printdata("UDP Send" + msgname, ID, ID, Configuration.getID( UDP_IP ) , MESSAGE )
+    printdata("UDP Send" + msgname, ID, ID, Configuration.getID( UDP_IP ) , MESSAGE )
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
     sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
 
