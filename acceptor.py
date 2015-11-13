@@ -16,7 +16,8 @@ def printdata(head, node, source, end, data):
 #tag:udpserver
 def acceptor_udp_server():
     ID = Configuration.getMyID()
-    UDP_PORT = Configuration.ACCEPTOR_PORT
+    #UDP_PORT = Configuration.ACCEPTOR_PORT
+    UDP_PORT = Configuration.ports["prepare"]
     print threading.currentThread().getName(), ' Acceptor UDP Server Starting. I am Node#', ID, "at port", UDP_PORT
 
     sock = socket.socket(socket.AF_INET, # Internet
@@ -29,13 +30,13 @@ def acceptor_udp_server():
         #try:
         json_object = json.loads(data.strip())
         if json_object['msgname'] == "commit": 
-           onCommit(json_object['entryID'], json_object['msglist']) 
+           onCommit(json_object['entryID'], json_object['msglist'], peerID) 
            printdata("Acceptor Recv Commit", ID, peerID, ID, data)
         elif json_object['msgname'] == "accept":
-           onAccept(json_object['entryID'], json_object['msglist']) 
+           onAccept(json_object['entryID'], json_object['msglist'], peerID) 
            printdata("Acceptor Recv Accept", ID, peerID, ID, data)
         elif json_object['msgname'] == "prepare":
-           onPrepare(json_object['entryID'], json_object['msglist']) 
+           onPrepare(json_object['entryID'], json_object['msglist'], peerID) 
            printdata("Acceptor Recv Prepare", ID, peerID, ID, data)
         #except:
         #    print "Can't parse data:", data, sys.exc_info()[0]
@@ -53,7 +54,7 @@ def firstRun():
                                'value' : Configuration.init_value }
     savelog(locallog)
 
-def onPrepare(entryID, msglist):
+def onPrepare(entryID, msglist, peerID):
     print "onPrepare:", entryID, ",", msglist
     m = int(msglist[0])
     entryID = str(entryID)
@@ -62,12 +63,12 @@ def onPrepare(entryID, msglist):
         locallog[entryID]["maxPrepare"] = m
         send_msglist = [locallog[entryID]["accNum"], locallog[entryID]["accVal"]]
         print "send promise"
-        udp_send(entryID, "promise", send_msglist) 
+        udp_send(entryID, "promise", send_msglist, peerID) 
     else:
         print "rejected"
     savelog(locallog)
 
-def onAccept(entryID, msglist):
+def onAccept(entryID, msglist, peerID):
     print "onAccept:", entryID, ",", msglist
     m = int(msglist[0])
     entryID = str(entryID)
@@ -78,21 +79,21 @@ def onAccept(entryID, msglist):
         locallog[entryID]['accVal'] = v 
         send_msglist = [locallog[entryID]['accNum'], locallog[entryID]['accVal']]
         print "send ack"
-        udp_send(entryID, "ack", send_msglist) 
+        udp_send(entryID, "ack", send_msglist, peerID) 
     else:
         print "rejected"
     savelog(locallog)
 
-def onCommit(entryID, msglist):
+def onCommit(entryID, msglist, peerID):
     print "onCommit:", entryID, ",", msglist
     locallog = readlog()
     locallog[entryID]["value"] = msglist[0]
     savelog(locallog)
 
-def udp_send(entryID, msgname, msglist): 
+def udp_send(entryID, msgname, msglist, peerID): 
     ID = Configuration.getMyID()
-    UDP_IP = Configuration.getPublicIP() 
-    UDP_PORT = Configuration.ACCEPTOR_PORT
+    UDP_IP = Configuration.getIP(peerID) 
+    UDP_PORT = Configuration.ports[msgname]
     msg = {}
     msg['msgname'] = msgname 
     msg['entryID'] = str( entryID ) 
@@ -124,13 +125,13 @@ tAcceptor.start()
 time.sleep(2)
 
 #udp_send( 1, "commit", ["value hahaha"] ) 
-#udp_send( 1, "commit", ["value hahaha"] ) 
-udp_send( 3, "prepare", ["4"] ) 
-udp_send( 3, "prepare", ["2"] ) 
-udp_send( 3, "prepare", ["5"] ) 
+udp_send( 1, "commit", ["value hahaha"], 1 ) 
+#udp_send( 3, "prepare", ["4"] ) 
 #udp_send( 3, "prepare", ["2"] ) 
-udp_send( 3, "accept", ["5", "my test value"] ) 
-udp_send( 3, "commit", ["my test value"] ) 
+#udp_send( 3, "prepare", ["5"] ) 
+#udp_send( 3, "prepare", ["2"] ) 
+#udp_send( 3, "accept", ["5", "my test value"] ) 
+#udp_send( 3, "commit", ["my test value"] ) 
 
 while threading.active_count() > 0:
     time.sleep(0.1)
