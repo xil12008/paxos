@@ -55,7 +55,7 @@ def firstRun():
     savelog(locallog)
 
 def onPrepare(entryID, msglist, peerID):
-    print "onPrepare:", entryID, ",", msglist
+    print "onPrepare: entryID=", entryID, ", m=", msglist, "from NODE", peerID
     m = int(msglist[0])
     entryID = str(entryID)
     locallog = readlog()
@@ -69,7 +69,7 @@ def onPrepare(entryID, msglist, peerID):
     savelog(locallog)
 
 def onAccept(entryID, msglist, peerID):
-    print "onAccept:", entryID, ",", msglist
+    print "onAccept: entryID=", entryID, ", m:v=", msglist, " from NODE", peerID
     m = int(msglist[0])
     entryID = str(entryID)
     v = msglist[1]
@@ -85,7 +85,7 @@ def onAccept(entryID, msglist, peerID):
     savelog(locallog)
 
 def onCommit(entryID, msglist, peerID):
-    print "onCommit:", entryID, ",", msglist
+    print "onCommit: entryID=", entryID, ", v=", msglist, "from NODE", peerID
     locallog = readlog()
     locallog[entryID]["value"] = msglist[0]
     savelog(locallog)
@@ -125,13 +125,13 @@ tAcceptor.start()
 time.sleep(2)
 
 #udp_send( 1, "commit", ["value hahaha"] ) 
-udp_send( 1, "commit", ["value hahaha"], 1 ) 
-#udp_send( 3, "prepare", ["4"] ) 
+#udp_send( 1, "commit", ["value hahaha"], Configuration.getMyID() ) 
+udp_send( 3, "prepare", ["4"] , Configuration.getMyID()) 
+udp_send( 3, "prepare", ["2"] , Configuration.getMyID()) 
+udp_send( 3, "prepare", ["5"] , Configuration.getMyID()) 
 #udp_send( 3, "prepare", ["2"] ) 
-#udp_send( 3, "prepare", ["5"] ) 
-#udp_send( 3, "prepare", ["2"] ) 
-#udp_send( 3, "accept", ["5", "my test value"] ) 
-#udp_send( 3, "commit", ["my test value"] ) 
+udp_send( 3, "accept", ["5", "my test value"] , Configuration.getMyID()) 
+udp_send( 3, "commit", ["my test value"] , Configuration.getMyID()) 
 
 while threading.active_count() > 0:
     time.sleep(0.1)
