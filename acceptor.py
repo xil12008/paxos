@@ -3,7 +3,7 @@ from configuration import Configuration as conf
 
 class Acceptor:
     def __init__(self):
-        self.proposer_ip = None
+        self.proposer_ip = conf.PROPOSER_IP
         self.acceptor_ips = conf.IPTABLE
         self.maxPrepare = 0
         self.accNum = 0
@@ -12,7 +12,6 @@ class Acceptor:
 
     def findProposer(self):
         for ip in self.acceptor_ips:
-            print ip, "prepare"
             data = self.UDP.recv(ip, "prepare")
             if data!=None :
                 self.proposer_ip = ip
@@ -21,10 +20,7 @@ class Acceptor:
 
     def run(self):
         while(True):
-            if self.proposer_ip == None:
-                data = self.findProposer()
-            else :
-                data = self.UDP.recv(self.proposer_ip, "prepare")
+            data = self.UDP.recv(self.proposer_ip, "prepare")
             if data == None : continue
             recv_msg = eval(data)
             print recv_msg
