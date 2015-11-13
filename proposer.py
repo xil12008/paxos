@@ -62,6 +62,7 @@ class Proposer:
         majority = []
         for acceptor_ip in self.acceptors_ip:
             data = self.UDP.recv(acceptor_ip, "promise")
+            print data
             if data == None: continue
             #msg = eval(data)
             msg = translateMsg(data)
