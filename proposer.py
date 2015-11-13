@@ -54,25 +54,24 @@ class Proposer:
 
     def translateMsg(self, data):
         data = eval(data)
-        msg = {"msgname":data["msgname"], "entryID":data["entryID"], "accNum":data["msglist"][0], "accVal":data["msglist"][1]}
+        #msg = {"msgname":data["msgname"], "entryID":data["entryID"], "accNum":data["msglist"][0], "accVal":data["msglist"][1]}
+        msg = data
         return msg
     
 
     def promise(self):
         majority = []
         for acceptor_ip in self.acceptors_ip:
-            data = self.UDP.recv(acceptor_ip, "promise")
-            print data
+            data,addr = self.UDP.recv(acceptor_ip, "promise")
             if data == None: continue
-            #msg = eval(data)
-            msg = translateMsg(data)
+            msg = self.translateMsg(data)
             
             if msg["msgname"] != "promise": continue
             if msg["accNum"] >= self.m : continue
             
             majority.append(msg)
         self.select_val(majority)
-        print majority
+        print "promise majority:", majority
         if len(majority)<=self.acceptors_num/2: return False
         else : return True
     
@@ -84,16 +83,14 @@ class Proposer:
     def ack(self):
         majority = []
         for acceptor_ip in self.acceptors_ip:
-            data = self.UDP.recv(acceptor_ip, "ack")
+            data,addr = self.UDP.recv(acceptor_ip, "ack")
             if data == None: continue
-            #msg = eval(data)
-            msg = translateMsg(data)
-            
+            msg = self.translateMsg(data)
             if msg["msgname"] != "ack": continue
             if msg["accNum"] != self.m : continue
             if msg["accVal"] != self.v : continue
             majority.append(msg)
-        print majority
+        print "ack majority:", majority
         if len(majority)<=self.acceptors_num/2 : return False
         else : return True
     

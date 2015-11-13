@@ -3,12 +3,11 @@ from configuration import Configuration as conf
 
 class Acceptor:
     def __init__(self):
-        self.proposer_ip = conf.PROPOSER_IP
-        self.acceptor_ips = conf.IPTABLE
+        self.proposer_ip = ''
         self.maxPrepare = 0
         self.accNum = 0
         self.accVal = None
-        self.UDP = udp.UDP()
+        self.UDP = udp.UDP(10)
 
     def findProposer(self):
         for ip in self.acceptor_ips:
@@ -20,7 +19,8 @@ class Acceptor:
 
     def run(self):
         while(True):
-            data = self.UDP.recv(self.proposer_ip, "prepare")
+            data, addr = self.UDP.recv('', "prepare")
+            self.proposer_ip = '127.0.0.1'
             if data == None : continue
             recv_msg = eval(data)
             print recv_msg

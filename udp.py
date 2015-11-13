@@ -2,7 +2,7 @@ import socket
 from configuration import Configuration as conf
 
 class UDP:
-    def __init__(self, timeout=10):
+    def __init__(self, timeout=3):
         self.timeout = timeout
         self.ports = conf.PORTS
 
@@ -20,7 +20,8 @@ class UDP:
             data,addr = sock.recvfrom(1024) # buffer size is 1024 bytes
         except socket.error:
             data = None
-        return data
+            addr = None
+        return data,addr
 
 def test():
     #ports = {"prepare":12345, "promise":12346, "accept":12347, "ack":12348, "commit":12349}
