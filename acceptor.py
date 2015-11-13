@@ -61,9 +61,9 @@ def transferInput(data):
     if json_object["msgname"] == "commit":
         json_object["msglist"] = [ msg_tmp["val"] ]
     elif json_object['msgname'] == "accept":
-        json_object["msglist"] = [ msg_tmp["m"], msg_tmp["v"] ]
+        json_object["msglist"] = [ msg_tmp["id"], msg_tmp["val"] ]
     elif json_object['msgname'] == "prepare":
-        json_object["msglist"] = [ msg_tmp["m"] ]
+        json_object["msglist"] = [ msg_tmp["id"] ]
     return json_object
 
 def firstRun():
