@@ -109,7 +109,7 @@ def udp_send(entryID, msgname, msglist, peerID):
     msg['entryID'] = str( entryID ) 
     msg['msglist'] = msglist 
     MESSAGE = json.dumps(msg) 
-    printdata("UDP Send" + msgname, ID, ID, Configuration.getID( UDP_IP ) , MESSAGE )
+    printdata("UDP Send " + msgname, ID, ID, Configuration.getID( UDP_IP ) , MESSAGE )
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
     sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
 
