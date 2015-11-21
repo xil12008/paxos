@@ -1,10 +1,10 @@
 import udp
-from configuration import Configuration as conf
 
 class Acceptor:
     def __init__(self):
         self.proposer_ip = ''
         self.record = {}
+        self.readlog()
         self.UDP = udp.UDP()
 
     def initRecord(self,key):
@@ -34,6 +34,7 @@ class Acceptor:
                 m = recv_msg["id"]
                 if m > self.record[entryID]["maxPrepare"]:
                     self.record[entryID]["maxPrepare"] = m
+                    self.savelog()
                     send_msg = {"entryID":entryID, "msgname":"promise", "accNum":self.record[entryID]["accNum"], "accVal":self.record[entryID]["accVal"]}
                     self.UDP.send(self.proposer_ip, send_msg["msgname"], str(send_msg))
                 else :
@@ -46,11 +47,25 @@ class Acceptor:
                 if m >= self.record[entryID]["maxPrepare"]:
                     self.record[entryID]["accNum"] = m
                     self.record[entryID]["accVal"] = v
+                    self.savelog()
                     send_msg = {"entryID":entryID, "msgname":"ack", "accNum":self.record[entryID]["accNum"], "accVal":self.record[entryID]["accVal"]}
                     self.UDP.send(self.proposer_ip, send_msg["msgname"], str(send_msg))
             elif recv_msg["msgname"]== "commit":
                 v = recv_msg["val"]
-                print "record:", v, "in log" #toDo
+                self.record[entryID]["commitVal"] = v
+                self.savelog()
+
+    def savelog(self):
+        f = open('acceptor.state', 'w')
+        f.write(str(self.record))
+
+    def readlog(self):
+        try:
+            f = open('acceptor.state', 'r')
+            for line in f:
+                self.record = eval(line)
+        except:
+            ""
 
 def test():
     acceptor = Acceptor()
