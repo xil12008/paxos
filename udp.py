@@ -24,7 +24,6 @@ class UDP:
         return data,addr
 
 def test():
-    #ports = {"prepare":12345, "promise":12346, "accept":12347, "ack":12348, "commit":12349}
     udp = UDP()
     msg = {"slot":0,"accNum":1, "accVal":"val"}
     udp.send("localhost", "promise", str(msg))
