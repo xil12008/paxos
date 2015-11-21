@@ -10,7 +10,6 @@ class Synod:
         self.m = self.getMaxPrepare()
         self.v = value
         self.opt = opt
-        print "opt"+str(self.opt)
 
     def setEvent(self, event):
         self.v = event
@@ -83,14 +82,12 @@ class Synod:
         self.m +=1
         self.prepare()
         promise = self.promise()
-        print "promise:\t"+str(promise)
         if not promise : self.phase1()
 
 
     def phase2(self):
         self.accept()
         ack = self.ack()
-        print "ack:\t"+str(ack)
         if ack : self.commit()
         else :
             if self.opt : self.phase2()

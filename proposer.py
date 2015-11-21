@@ -1,9 +1,11 @@
 import random
+import udp
 from synod import Synod
 
 class Proposer:
     def __init__(self, opt):
         self.opt = opt
+        self.UDP = udp.UDP()
         self.values = {}
         self.synods = {}
         print "opt"+str(self.opt)
@@ -57,17 +59,19 @@ class Proposer:
                 synod.allPhases()
                 break
 
-def getTime():
-    startTime = 0
-    endTime = 0
-    while(startTime>=endTime):
-        startTime = random.randint(0,10)
-        endTime = random.randint(0,10)
-    return startTime, endTime
+    def run(self):
+        while True :
+            data,addr = self.UDP.recv('', "event")
+            if data == None : continue
+            user = addr[0]
+            event = eval(data)
+            self.paxos(event)
+            self.UDP.send(user,"complete","")
+
+
 
 def testPaxos():
     proposer = Proposer(random.randint(0,1)==0)
-    startTime, endTime = getTime()
-    proposer.paxos({"operation":"add", "app_name":random.randint(0,1), "startTime":startTime, "endTime":endTime})
+    proposer.run()
 
 testPaxos()

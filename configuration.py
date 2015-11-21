@@ -11,7 +11,7 @@ class Configuration:
     #IPTABLE = ['localhost']
     UDPPORT = 5005 #UDP PORT
     TCPPORT = 12345 #TCP PORT
-    PORTS = {"prepare":12345, "promise":12346, "maxPrepare":12346, "accept":12345, "ack":12348, "commit":12345, "request":12345, "update":12347}
+    PORTS = {"prepare":12345, "promise":12346, "maxPrepare":12346, "accept":12345, "ack":12348, "commit":12345, "event":12350, "complete":12351}
     
     ACCEPTOR_PORT = 12346
     LEADER_PORT = 12347
