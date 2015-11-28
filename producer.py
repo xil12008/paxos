@@ -73,14 +73,14 @@ class Producer(Thread):
             return queue
 
 if __name__=="__main__":
-    producer = Producer()
-    producer.start()
+    #producer = Producer()
+    #producer.start()
 
-    consumer = Consumer(producer.queue)
-    consumer.start()
+    #consumer = Consumer(producer.queue)
+    #consumer.start()
  
-    acceptor = Acceptor()
-    acceptor.start()
+    #acceptor = Acceptor()
+    #acceptor.start()
 
     bullyalgorithm()
    
