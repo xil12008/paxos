@@ -7,85 +7,58 @@ import socket
 import time
 from configuration import Configuration
 
+timervar = -99999999
+leader = -1 # unknown leader 
 
 #tag:print
 def printdata(head, node, source, end, data):
     print "NODE#%d: %s %d=====>%d data=[%s]" %( node, head, source, end, data)
 
 def TCPSend(dest, content):
+    print "TCPSend"
     TCP_IP = Configuration.getIP(dest) 
     MYIP = Configuration.getPublicIP()
-    if TCP_IP == MYIP:
-       print "TCPSend() terminates. (Error: sending to itself)" #Ignore itself
-       return
     TCP_PORT = Configuration.TCPPORT 
     ID = Configuration.getMyID()
-    #print threading.currentThread().getName(), 'TCP Client Starting. I am Node#', ID
     BUFFER_SIZE = 1024
-    count = 0;
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    flag = True
-    while flag and count < 1: 
-        try:
-            s.connect((TCP_IP, TCP_PORT))
-            s.send(content)
-            printdata("TCP Send", ID, ID, Configuration.getID(TCP_IP), content)
-            #data = s.recv(BUFFER_SIZE)
-            s.close()
-            flag = False
-        except:
-            printdata("TCP Client Reconnect", ID, ID, Configuration.getID(TCP_IP), "@_@_~:" + content)
-            time.sleep(0.5) #Reconnect delay 
-            count += 1
-    #print threading.currentThread().getName(), 'TCP Client Exiting Successfully. I am Node #', ID
-    if count < 1:
+    try:
+        s.connect((TCP_IP, TCP_PORT))
+        s.send(content)
+        printdata("TCP Send", ID, ID, Configuration.getID(TCP_IP), content)
+        s.close()
         return 0 #exit successfully 
-    else:
-        return 1 #sending msg failed
+    except:
+        printdata("Fail", ID, ID, Configuration.getID(TCP_IP), content)
+        return 1
     
 def bcastCoordinator():
-    global winFlag
-    if winFlag == False:
-       #print "return because False"
-       return
-    print "^_^----I am the leader"
-    global leaderlock
-    global leader
-    leaderlock.acquire()
-    try: 
-        leader = MYID
-    finally:
-        leaderlock.release()
     for i in range(1, Configuration.getN() + 1):
         TCPSend(i, "Coordinator")
 
-def holdElection(ID):
-    print "NODE#", ID, "holds election now"
-    global winFlag
-    winFlag = True 
-    #print "True"
+def bcastElection(ID):
+    print "bcastElection"
     for bi in range(ID + 1, Configuration.getN() + 1):
         TCPSend( bi, "ELECTION") 
-    t = Timer(20.0, bcastCoordinator)
-    t.start()
 
 #tag:tcpserver
 def TCPServer():
     ID = Configuration.getMyID()
     N = Configuration.getN()
     MYIP = Configuration.getPublicIP()
-    print threading.currentThread().getName(), 'TCP Server Starting. I am Node#', ID, "ip=", MYIP
     TCP_PORT = Configuration.TCPPORT 
-    BUFFER_SIZE = 1024  # Normally 1024, but we want fast response
+    BUFFER_SIZE = 1024
 
-    _state_ = "NULL"
-
+    print threading.currentThread().getName(), 'TCP Server Starting. I am Node#', ID, "ip=", MYIP
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(( socket.gethostname(), TCP_PORT))
+    print "TCP Server at", socket.gethostname(), ":", TCP_PORT
     server.listen(5) #At most 5 concurrent connection
     input = [server] 
-    running = 1 
-    while running: 
+    global timervar
+    global leader
+
+    while 1: 
         inputready,outputready,exceptready = select.select(input,[],[]) 
     
         for s in inputready: 
@@ -99,27 +72,20 @@ def TCPServer():
                 if data: 
                     peerID =  Configuration.getID( s.getpeername()[0] )
                     printdata("TCP Recv", ID, peerID, ID, data)
-                    #s.send(data) 
-                    #forward to the next node
-                    time.sleep(1)
                     if data[0] == 'C': #Coordinate
                         print "NODE #", ID, "Leader is", peerID
-                        global leaderlock
-                        global leader
-                        leaderlock.acquire()
-                        try: 
-                            leader = peerID
-                        finally:
-                            leaderlock.release()
+                        leader = peerID
                     elif data[0] == 'E': #Election
                         if peerID < ID:
-                            TCPSend( peerID, "OK" )
-                            holdElection(ID)
+                            TCPSend( peerID, "OK")
+                            bcastElection(ID)
+                            timervar = 0
+                        elif peerID == ID:
+                            bcastElection(ID)
+                            timervar = 0
                     elif data[0] == 'O': #OK
                         print "NODE #", ID, "Gave up. (Receive OK from", peerID, ")"
-                        global winFlag
-                        winFlag = False
-                        #print "False"
+                        timervar = -99999
                 else: 
                     s.close() 
                     input.remove(s) 
@@ -128,46 +94,46 @@ def TCPServer():
     print threading.currentThread().getName(), 'TCP Server Exiting. I am NODE#', ID
     return
 
+def accumulate():
+    global timervar
+    while True:
+        time.sleep(1) 
+        if timervar >= 0:
+            timervar += 1 
+            print "wait OK for " , timervar, "/7 seconds..." 
+        if timervar == 7:
+            timervar = -9999999
+            bcastCoordinator()
+
+def checkalive():
+    time.sleep(10)
+    ID = Configuration.getMyID()
+    #hold election by itself
+    TCPSend(ID, "ELECTION")
+    global leader
+    while True:
+       try:
+          print "Check leader alive? My leader is", leader 
+          if leader != -1:
+              if TCPSend(leader, "hi") == 1 : #leader dead
+                  TCPSend(ID, "ELECTION")
+       finally:
+           time.sleep(20)
+
 #============================ main =========================#
 
-winFlag = True #Default is that a process will thought it is the highest-ID alive process
-alive = [1 for _ in range(Configuration.getN() + 1)]
-alivemutex = Lock()
 
-leader = 0 #unknown leader 
-leaderlock = Lock()
+t = threading.Thread(target=checkalive)
+t.daemon = True
+t.start()
 
-tTCPServer = threading.Thread(target=TCPServer)
-tTCPServer.daemon = True
-tTCPServer.start()
+t2 = threading.Thread(target=accumulate)
+t2.daemon = True
+t2.start()
 
-ID = Configuration.getMyID()
-MYID = Configuration.getMyID()
+TCPServer()
 
 time.sleep(5)
-holdElection(ID)
-
-while True:
-    alivemutex.acquire()
-    try:
-       print "Check every one alive. My leader is", leader 
-       for i in range(1, Configuration.getN() + 1):
-            if i == ID: continue
-            tmp = 1 - TCPSend(i, "hi")
-            if alive[i] != tmp: 
-                if alive[i] > tmp:
-                    print "NODE", ID, " >:-( NODE", i, "is dead"
-                elif alive[i] < tmp:
-                    print "NODE", ID, " ^-^ NODE", i, "is alive"
-                alive[i] = tmp 
-                holdElection( Configuration.getMyID() )
-    finally:
-        alivemutex.release()
-        time.sleep(5)
-
-#userinput = raw_input("Press A to hold election...")
-#if userinput == "A":
-#    print "hold election now"
 
 while threading.active_count() > 0:
     time.sleep(0.1)
