@@ -1,8 +1,12 @@
 import Queue
-from consumer import Consumer
+import threading
 from threading import Thread
 from collections import deque
 import time
+
+from consumer import Consumer
+from acceptor import Acceptor
+from bullyalgorithm import bullyalgorithm 
 
 class Producer(Thread):
     def __init__(self):
@@ -68,13 +72,18 @@ class Producer(Thread):
         finally:
             return queue
 
-def testProducer():
+if __name__=="__main__":
     producer = Producer()
     producer.start()
 
-    time.sleep(7)
-
     consumer = Consumer(producer.queue)
     consumer.start()
+ 
+    acceptor = Acceptor()
+    acceptor.start()
 
-testProducer()
+    bullyalgorithm()
+   
+    while threading.active_count() > 0:
+        time.sleep(0.1)
+

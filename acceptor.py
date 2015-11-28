@@ -1,7 +1,9 @@
 import udp
+from threading import Thread
 
-class Acceptor:
+class Acceptor(Thread):
     def __init__(self):
+        Thread.__init__(self)
         self.proposer_ip = ''
         self.record = {}
         self.readlog()
@@ -71,4 +73,4 @@ def test():
     acceptor = Acceptor()
     acceptor.run()
 
-test()
+#test()

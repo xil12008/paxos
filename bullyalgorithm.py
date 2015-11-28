@@ -42,7 +42,7 @@ def bcastElection(ID):
         TCPSend( bi, "ELECTION") 
 
 #tag:tcpserver
-def TCPServer():
+def Bully_TCPServer():
     ID = Configuration.getMyID()
     N = Configuration.getN()
     MYIP = Configuration.getPublicIP()
@@ -122,18 +122,19 @@ def checkalive():
 
 #============================ main =========================#
 
+def bullyalgorithm():
+    t = threading.Thread(target=checkalive)
+    t.daemon = True
+    t.start()
+    
+    t2 = threading.Thread(target=accumulate)
+    t2.daemon = True
+    t2.start()
+    
+    t3 = threading.Thread(target=Bully_TCPServer)
+    t3.daemon = True
+    t3.start()
 
-t = threading.Thread(target=checkalive)
-t.daemon = True
-t.start()
-
-t2 = threading.Thread(target=accumulate)
-t2.daemon = True
-t2.start()
-
-TCPServer()
-
-time.sleep(5)
-
-while threading.active_count() > 0:
-    time.sleep(0.1)
+    #time.sleep(5)
+    #while threading.active_count() > 0:
+    #    time.sleep(0.1)
