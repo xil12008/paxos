@@ -1,10 +1,13 @@
 import udp
 import Queue
 import random
+from threading import Thread
+import time
 from configuration import Configuration as conf
 
-class Consumer:
+class Consumer(Thread):
     def __init__(self, queue):
+        Thread.__init__(self)
         self.event = None
         self.users_ip = conf.IPTABLE
         self.UDP = udp.UDP()
@@ -16,7 +19,12 @@ class Consumer:
         self.event = self.queue.queue[0]
 
     def popEvent(self):
-        self.queue.get()
+        tmp = self.queue.get()
+        self.savequeue()
+
+    def savequeue(self):
+        f = open('user.queue', 'w')
+        f.write(str(list(self.queue.queue)))
 
     def sendEvent(self):
         for user in self.users_ip:
@@ -28,8 +36,9 @@ class Consumer:
     def run(self):
         while True:
             if not self.sendEvent() : continue
-            self.popEvent()
-            self.getEvent()
+            print self.popEvent()
+            print self.getEvent()
+            time.sleep(1)
 
 def getTime():
     startTime = 0
@@ -44,6 +53,6 @@ def testConsumer():
     startTime, endTime = getTime()
     queue.put({"operation":"add", "app_name":random.randint(0,1), "startTime":startTime, "endTime":endTime})
     consumer = Consumer(queue)
-    consumer.run()
+    consumer.start()
 
-testConsumer()
+#testConsumer()
