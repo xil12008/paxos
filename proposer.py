@@ -1,13 +1,17 @@
 import random
 import udp
 from synod import Synod
+from threading import Thread
+from configuration import Configuration
 
-class Proposer:
+class Proposer(Thread):
     def __init__(self, opt):
+        Thread.__init__(self)
         self.opt = opt
         self.UDP = udp.UDP()
         self.values = {}
         self.synods = {}
+        self.ID = Configuration.getMyID()
         print "opt"+str(self.opt)
 
     def getSynod(self, entryID, event=None):
@@ -60,18 +64,18 @@ class Proposer:
                 break
 
     def run(self):
-        while True :
+        while self.ID == Configuration.leader:
             data,addr = self.UDP.recv('', "event")
             if data == None : continue
             user = addr[0]
             event = eval(data)
             self.paxos(event)
             self.UDP.send(user,"complete","")
-
+        print "proposer(leader) quit"
 
 
 def testPaxos():
     proposer = Proposer(random.randint(0,1)==0)
     proposer.run()
 
-testPaxos()
+#testPaxos()

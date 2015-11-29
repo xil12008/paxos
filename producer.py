@@ -73,16 +73,16 @@ class Producer(Thread):
             return queue
 
 if __name__=="__main__":
-    #producer = Producer()
-    #producer.start()
-
-    #consumer = Consumer(producer.queue)
-    #consumer.start()
- 
-    #acceptor = Acceptor()
-    #acceptor.start()
-
     bullyalgorithm()
+
+    producer = Producer()
+    producer.start()
+
+    consumer = Consumer(producer.queue)
+    consumer.start()
+ 
+    acceptor = Acceptor()
+    acceptor.start()
    
     while threading.active_count() > 0:
         time.sleep(0.1)

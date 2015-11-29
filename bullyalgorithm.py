@@ -6,9 +6,10 @@ import select
 import socket
 import time
 from configuration import Configuration
+from proposer import Proposer
 
 timervar = -99999999
-leader = -1 # unknown leader 
+#leader = -1 # unknown leader 
 
 #tag:print
 def printdata(head, node, source, end, data):
@@ -56,7 +57,6 @@ def Bully_TCPServer():
     server.listen(5) #At most 5 concurrent connection
     input = [server] 
     global timervar
-    global leader
 
     while 1: 
         inputready,outputready,exceptready = select.select(input,[],[]) 
@@ -74,7 +74,9 @@ def Bully_TCPServer():
                     printdata("TCP Recv", ID, peerID, ID, data)
                     if data[0] == 'C': #Coordinate
                         print "NODE #", ID, "Leader is", peerID
-                        leader = peerID
+                        Configuration.leader = peerID
+                        if Configuration.leader == ID:
+                            Proposer(opt=False).start()
                     elif data[0] == 'E': #Election
                         if peerID < ID:
                             TCPSend( peerID, "OK")
@@ -110,12 +112,11 @@ def checkalive():
     ID = Configuration.getMyID()
     #hold election by itself
     TCPSend(ID, "ELECTION")
-    global leader
     while True:
        try:
-          print "Check leader alive? My leader is", leader 
-          if leader != -1:
-              if TCPSend(leader, "hi") == 1 : #leader dead
+          print "Check leader alive? My leader is", Configuration.leader 
+          if Configuration.leader != -1:
+              if TCPSend(Configuration.leader, "hi") == 1 : #leader dead
                   TCPSend(ID, "ELECTION")
        finally:
            time.sleep(20)
