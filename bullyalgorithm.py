@@ -9,6 +9,7 @@ from configuration import Configuration
 from proposer import Proposer
 
 timervar = -99999999
+optpaxos = False
 #leader = -1 # unknown leader 
 
 #tag:print
@@ -77,7 +78,7 @@ def Bully_TCPServer():
                         Configuration.leader = peerID
                         if Configuration.leader == ID:
                             time.sleep(4)
-                            Proposer(opt=False).start()
+                            Proposer(opt = optpaxos).start()
                     elif data[0] == 'E': #Election
                         if peerID < ID:
                             TCPSend( peerID, "OK")
@@ -124,7 +125,9 @@ def checkalive():
 
 #============================ main =========================#
 
-def bullyalgorithm():
+def bullyalgorithm(opt):
+    global optpaxos
+    optpaxos = opt
     t = threading.Thread(target=checkalive)
     t.daemon = True
     t.start()

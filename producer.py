@@ -43,19 +43,34 @@ class Producer(Thread):
                     print warning
                     continue
                 else:
-                    pass
-                    print "Roger that."
+                    print "Roger that. Your local calendar:"
+                    self.showCalendar()
             elif cmds[0]=="log":
                 if len(cmds)!=1:
                     warning = "format: log"
                     print warning
                     continue
                 else:
-                    pass
-                    print "Roger that."
+                    print "Roger that. Your local log:"
+                    self.showCalendar(committed = False)
             else:
                 print "Unknown command. Only accept add/del/view/log"
             time.sleep(1)
+
+    def showCalendar(self, committed = True):
+        record = {}
+        try:
+            f = open('acceptor.state', 'r')
+            for line in f:
+                record = eval(line)
+            for entryID in range(1000000): 
+                if entryID in record.keys():
+                    if committed:
+                        print record[entryID]["commitVal"]
+                    else:
+                        print record[entryID]
+        except:
+            print "Empty"  
 
     def savequeue(self):
         f = open('user.queue', 'w')
@@ -73,7 +88,7 @@ class Producer(Thread):
             return queue
 
 if __name__=="__main__":
-    bullyalgorithm()
+    bullyalgorithm(opt=False)
 
     producer = Producer()
     producer.start()
