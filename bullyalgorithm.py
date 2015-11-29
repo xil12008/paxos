@@ -76,6 +76,7 @@ def Bully_TCPServer():
                         print "NODE #", ID, "Leader is", peerID
                         Configuration.leader = peerID
                         if Configuration.leader == ID:
+                            time.sleep(4)
                             Proposer(opt=False).start()
                     elif data[0] == 'E': #Election
                         if peerID < ID:
