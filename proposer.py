@@ -9,7 +9,6 @@ class Proposer(Thread):
         Thread.__init__(self)
         self.opt = opt
         self.UDP = udp.UDP()
-        self.values = {}
         self.synods = {}
         self.ID = Configuration.getMyID()
         print "opt"+str(self.opt)
@@ -48,7 +47,7 @@ class Proposer(Thread):
         entryID = 0
         while(True):
             entryID+=1
-            if entryID in self.values : continue
+            if self.synods.has_key(entryID) : continue
             if self.eventCheck(entryID) :
                 synod = self.getSynod(entryID)
                 synod.allPhases()
