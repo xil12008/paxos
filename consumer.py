@@ -19,7 +19,7 @@ class Consumer(Thread):
 
     def popEvent(self):
         tmp = self.queue.get()
-        print "pop out", tmp
+        print "******************pop out***************", tmp
         self.savequeue()
 
     def savequeue(self):
