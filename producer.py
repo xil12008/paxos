@@ -18,6 +18,10 @@ class Producer(Thread):
         self.view = View()
         self.queue = self.readqueue() 
 
+    def dataPass(self, cmds):
+        if self.view.time_int(cmds[3])>=self.view.time_int(cmds[4]): return False
+        return True
+
     def run(self):
         print "Welcome"
         while True:
@@ -30,6 +34,9 @@ class Producer(Thread):
                     continue
                     #@TODO Conflict
                 else:
+                    if not self.dataPass(cmds):
+                        print "Wrong Input"
+                        continue
                     self.queue.put({"operation":"add", "app_name":cmds[1], "day":self.view.days_int(cmds[2]), "startTime":self.view.time_int(cmds[3]), "endTime":self.view.time_int(cmds[4]), "participants":cmds[5]})
                     self.savequeue()
                     print "Roger that."
