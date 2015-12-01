@@ -69,7 +69,7 @@ class Proposer(Thread):
             user = addr[0]
             event = eval(data)
             self.paxos(event)
-            self.UDP.send(user,"complete","")
+            self.UDP.send(user,"complete","finish event")
         print "proposer(leader) quit"
 
 
