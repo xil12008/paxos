@@ -11,7 +11,8 @@ class UDP:
                      socket.SOCK_DGRAM) # UDP
         sock.sendto(msg, (UDP_IP, self.ports[type]))
 
-    def recv(self, UDP_IP, type):
+    def recv(self, UDP_IP, type, usertimeout = 5):
+        self.timeout = usertimeout
         sock = socket.socket(socket.AF_INET, # Internet
                      socket.SOCK_DGRAM) # UDP
         try:
