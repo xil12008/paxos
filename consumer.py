@@ -12,7 +12,6 @@ class Consumer(Thread):
         self.users_ip = conf.IPTABLE
         self.UDP = udp.UDP()
         self.queue = queue
-        self.getEvent()
 
     def getEvent(self):
         while self.queue.empty(): ""
@@ -34,6 +33,7 @@ class Consumer(Thread):
         return True
 
     def run(self):
+        self.getEvent()
         while True:
             if not self.sendEvent() : continue
             print self.popEvent()
