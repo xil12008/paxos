@@ -2,11 +2,14 @@ import Queue
 import threading
 from threading import Thread
 from collections import deque
+import json
 import time
 
 from consumer import Consumer
 from acceptor import Acceptor
 from bullyalgorithm import bullyalgorithm 
+
+import pdb
 
 class Producer(Thread):
     def __init__(self):
@@ -63,12 +66,16 @@ class Producer(Thread):
             f = open('acceptor.state', 'r')
             for line in f:
                 record = eval(line)
+            print "<" * 25
             for entryID in range(1000000): 
                 if entryID in record.keys():
                     if committed:
-                        print record[entryID]["commitVal"]
+                        if "commitVal" in record[entryID].keys():
+                            print(json.dumps(record[entryID]["commitVal"]))
                     else:
-                        print record[entryID]
+                        print entryID, ":", 
+                        print(json.dumps(record[entryID]))
+            print ">" * 25
         except:
             print "Empty"  
 
