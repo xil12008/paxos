@@ -79,7 +79,9 @@ def Bully_TCPServer():
                         Configuration.leader = peerID
                         if Configuration.leader == ID and leaderHold != ID:
                             time.sleep(4)
-                            Proposer(opt = optpaxos).start()
+                            proposer = Proposer(opt = optpaxos)
+                            proposer.setDaemon(True)
+                            proposer.start()
                     elif data[0] == 'E': #Election
                         if peerID < ID:
                             TCPSend( peerID, "OK")

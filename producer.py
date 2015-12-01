@@ -91,12 +91,15 @@ if __name__=="__main__":
     bullyalgorithm(opt=False)
 
     producer = Producer()
+    producer.setDaemon(True)
     producer.start()
 
     consumer = Consumer(producer.queue)
+    consumer.setDaemon(True)
     consumer.start()
  
     acceptor = Acceptor()
+    acceptor.setDaemon(True)
     acceptor.start()
    
     while threading.active_count() > 0:
