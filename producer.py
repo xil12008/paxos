@@ -5,6 +5,7 @@ from collections import deque
 import json
 import time
 
+from view import View
 from consumer import Consumer
 from acceptor import Acceptor
 from bullyalgorithm import bullyalgorithm 
@@ -14,6 +15,7 @@ import pdb
 class Producer(Thread):
     def __init__(self):
         Thread.__init__(self)
+        self.view = View()
         self.queue = self.readqueue() 
 
     def run(self):
@@ -28,7 +30,7 @@ class Producer(Thread):
                     continue
                     #@TODO Conflict
                 else:
-                    self.queue.put({"operation":"add", "app_name":cmds[1], "day":cmds[2], "startTime":cmds[3], "endTime":cmds[4], "participants":cmds[5]})
+                    self.queue.put({"operation":"add", "app_name":cmds[1], "day":self.view.days_int(cmds[2]), "startTime":self.view.time_int(cmds[3]), "endTime":self.view.time_int(cmds[4]), "participants":cmds[5]})
                     self.savequeue()
                     print "Roger that."
             elif cmds[0]=="del":
@@ -71,13 +73,19 @@ class Producer(Thread):
                 if entryID in record.keys():
                     if committed:
                         if "commitVal" in record[entryID].keys():
+                            self.convertDate(record[entryID]["commitVal"])
                             print(json.dumps(record[entryID]["commitVal"]))
                     else:
                         print entryID, ":", 
                         print(json.dumps(record[entryID]))
             print ">" * 25
         except:
-            print "Empty"  
+            print "Empty"
+
+    def convertDate(self, dictionary):
+        if "day" in dictionary.keys(): dictionary["day"] = self.view.days_str(dictionary["day"])
+        if "startTime" in dictionary.keys(): dictionary["startTime"] = self.view.time_str(dictionary["startTime"])
+        if "endTime" in dictionary.keys(): dictionary["endTime"] = self.view.time_str(dictionary["endTime"])
 
     def savequeue(self):
         f = open('user.queue', 'w')
