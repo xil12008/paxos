@@ -75,8 +75,9 @@ def Bully_TCPServer():
                     printdata("TCP Recv", ID, peerID, ID, data)
                     if data[0] == 'C': #Coordinate
                         print "NODE #", ID, "Leader is", peerID
+                        leaderHold = Configuration.leader
                         Configuration.leader = peerID
-                        if Configuration.leader == ID:
+                        if Configuration.leader == ID and leaderHold != ID:
                             time.sleep(4)
                             Proposer(opt = optpaxos).start()
                     elif data[0] == 'E': #Election
