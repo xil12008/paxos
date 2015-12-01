@@ -30,6 +30,7 @@ class Consumer(Thread):
             self.UDP.send(user,"event",str(self.event))
         data,addr = self.UDP.recv('', "complete")
         if data == None : return False
+        print "send event done, recved:", data, "from", addr
         return True
 
     def run(self):
