@@ -49,6 +49,7 @@ class Producer(Thread):
                     self.queue.put({"operation":"del", "app_name":cmds[1]})
                     self.savequeue()
                     print "Roger that."
+                    self.printqueue()
             elif cmds[0]=="view":
                 if len(cmds)!=1:
                     warning = "format: view"
@@ -65,8 +66,17 @@ class Producer(Thread):
                 else:
                     print "Roger that. Your local log:"
                     self.showCalendar(committed = False)
+            elif cmds[0]=="queue":
+                if len(cmds)!=1:
+                    warning = "format: queue"
+                    print warning
+                    continue
+                else:
+                    print "Roger that. Your command FIFO queue:"
+                    self.printqueue()
             else:
                 print "Unknown command. Only accept add/del/view/log"
+            print "-" * 32 
             time.sleep(1)
 
     def showCalendar(self, committed = True):
@@ -90,13 +100,19 @@ class Producer(Thread):
             print "Empty"
 
     def convertDate(self, dictionary):
-        if "day" in dictionary.keys(): dictionary["day"] = self.view.days_str(dictionary["day"])
-        if "startTime" in dictionary.keys(): dictionary["startTime"] = self.view.time_str(dictionary["startTime"])
-        if "endTime" in dictionary.keys(): dictionary["endTime"] = self.view.time_str(dictionary["endTime"])
+        if "day" in dictionary.keys(): 
+            dictionary["day"] = self.view.days_str(dictionary["day"])
+        if "startTime" in dictionary.keys():
+            dictionary["startTime"] = self.view.time_str(dictionary["startTime"])
+        if "endTime" in dictionary.keys():
+            dictionary["endTime"] = self.view.time_str(dictionary["endTime"])
 
     def savequeue(self):
         f = open('user.queue', 'w')
         f.write(str(list(self.queue.queue)))
+
+    def printqueue(self):
+        print str(list(self.queue.queue))
     
     def readqueue(self):
         queue = Queue.Queue()

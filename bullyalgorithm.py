@@ -113,7 +113,7 @@ def accumulate():
             bcastCoordinator()
 
 def checkalive():
-    time.sleep(10)
+    time.sleep(2)
     ID = Configuration.getMyID()
     #hold election by itself
     TCPSend(ID, "ELECTION")

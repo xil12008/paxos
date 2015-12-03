@@ -4,6 +4,7 @@ import random
 from threading import Thread
 import time
 from configuration import Configuration as conf
+from bullyalgorithm import TCPSend
 
 class Consumer(Thread):
     def __init__(self, queue):
@@ -19,14 +20,25 @@ class Consumer(Thread):
 
     def popEvent(self):
         tmp = self.queue.get()
-        print "******************pop out***************", tmp
+        print "**from command queue pop out:",tmp
         self.savequeue()
 
     def savequeue(self):
         f = open('user.queue', 'w')
         f.write(str(list(self.queue.queue)))
+  
+    def wait4leader(self): 
+        while True:
+          if conf.leader != -1:
+              if TCPSend(conf.leader, "hi") == 0 : #alive leader found 
+                  time.sleep(6)
+                  print "wait4leader: alive leader found"
+                  return
+          time.sleep(1)
 
     def sendEvent(self):
+        print "sendEvent: wait4leader"
+        self.wait4leader() 
         for user in self.users_ip:
             self.UDP.send(user,"event",str(self.event))
         data,addr = self.UDP.recv('', "complete")
