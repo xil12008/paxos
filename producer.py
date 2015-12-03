@@ -19,8 +19,42 @@ class Producer(Thread):
         self.queue = self.readqueue() 
 
     def dataPass(self, cmds):
-        if self.view.time_int(cmds[3])>=self.view.time_int(cmds[4]): return False
-        return True
+        if cmds[0]=="add":
+            if self.view.time_int(cmds[3])>=self.view.time_int(cmds[4]): return False
+            return True
+        elif cmds[0]=="del":
+            print self.constructCalendar()
+            print "C"* 32
+            if cmds[1] in self.constructCalendar():
+                return True
+            return False
+  
+    def readlog(self):
+        record = {}
+        try:
+            f = open('acceptor.state', 'r')
+            for line in f:
+                record = eval(line)
+        finally:
+            return record
+
+    def constructCalendar(self):
+        record = self.readlog()
+        calendar = {} 
+        for entryID in range(10000): 
+            if entryID in record.keys():
+                if "commitVal" in record[entryID].keys():
+                    if record[entryID]["commitVal"]["operation"] == "add":
+                        if record[entryID]["commitVal"]["app_name"] in calendar.keys():
+                            print "Error: add same appointment name for mulitiple times."
+                            break
+                        calendar[record[entryID]["commitVal"]["app_name"]] = record[entryID]["commitVal"]
+                    elif record[entryID]["commitVal"]["operation"] == "del":
+                        if not record[entryID]["commitVal"]["app_name"] in calendar.keys():
+                            print "Error: try to delete an non-exist appointment."
+                            break
+                        calendar.pop(record[entryID]["commitVal"]["app_name"], None)
+        return calendar
 
     def run(self):
         print "Welcome"
@@ -39,16 +73,20 @@ class Producer(Thread):
                         continue
                     self.queue.put({"operation":"add", "app_name":cmds[1], "day":self.view.days_int(cmds[2]), "startTime":self.view.time_int(cmds[3]), "endTime":self.view.time_int(cmds[4]), "participants":cmds[5]})
                     self.savequeue()
-                    print "Roger that."
+                    print "Roger that. Your command queue:"
+                    self.printqueue()
             elif cmds[0]=="del":
                 if len(cmds)!=2:
                     warning = "format: del <calendar name>"
                     print warning
                     continue 
                 else:
+                    if not self.dataPass(cmds):
+                        print "Wrong Input"
+                        continue
                     self.queue.put({"operation":"del", "app_name":cmds[1]})
                     self.savequeue()
-                    print "Roger that."
+                    print "Roger that. Your command queue:"
                     self.printqueue()
             elif cmds[0]=="view":
                 if len(cmds)!=1:
@@ -56,8 +94,10 @@ class Producer(Thread):
                     print warning
                     continue
                 else:
-                    print "Roger that. Your local calendar:"
+                    print "Roger that. Your local commited log:"
                     self.showCalendar()
+                    print "Your calendar:"
+                    print self.constructCalendar()
             elif cmds[0]=="log":
                 if len(cmds)!=1:
                     warning = "format: log"
@@ -86,7 +126,7 @@ class Producer(Thread):
             for line in f:
                 record = eval(line)
             print "<" * 25
-            for entryID in range(1000000): 
+            for entryID in range(10000): 
                 if entryID in record.keys():
                     if committed:
                         if "commitVal" in record[entryID].keys():
