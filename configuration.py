@@ -6,7 +6,7 @@ from urllib2 import urlopen
 '''
 
 class Configuration:
-    IPTABLE = ['129.161.71.163', '129.161.71.244']
+    IPTABLE = ['128.213.11.178']
     #UDPPORT = 5005 #UDP PORT
     TCPPORT = 13333 #TCP PORT
     PORTS = {"prepare":12345, "promise":12346, "maxPrepare":12346, "accept":12345, "ack":12348, "commit":12345, "event":12350, "complete":12351}
