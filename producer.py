@@ -46,14 +46,16 @@ class Producer(Thread):
                 if "commitVal" in record[entryID].keys():
                     if record[entryID]["commitVal"]["operation"] == "add":
                         if record[entryID]["commitVal"]["app_name"] in calendar.keys():
-                            print "Error: add same appointment name for mulitiple times."
+                            print "Warning: add same appointment name for mulitiple times."
                             break
                         calendar[record[entryID]["commitVal"]["app_name"]] = record[entryID]["commitVal"]
                     elif record[entryID]["commitVal"]["operation"] == "del":
                         if not record[entryID]["commitVal"]["app_name"] in calendar.keys():
-                            print "Error: try to delete an non-exist appointment."
+                            print "Warning: try to delete an non-exist appointment."
                             break
                         calendar.pop(record[entryID]["commitVal"]["app_name"], None)
+        for key, ele in calendar.items():  
+            self.convertDate(calendar[key])
         return calendar
 
     def run(self):
@@ -61,6 +63,9 @@ class Producer(Thread):
         while True:
             cmd = raw_input("")
             cmds = cmd.strip().split()
+            if not cmds: 
+                print "Type something."
+                continue 
             if cmds[0]=="add":
                 if len(cmds)!=6:
                     warning = "format: add <calendar name> <day> <start time> <end time> <participant list>"
@@ -131,6 +136,7 @@ class Producer(Thread):
                     if committed:
                         if "commitVal" in record[entryID].keys():
                             self.convertDate(record[entryID]["commitVal"])
+                            print entryID, " | ",
                             print(json.dumps(record[entryID]["commitVal"]))
                     else:
                         print entryID, ":", 
