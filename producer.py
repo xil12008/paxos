@@ -20,12 +20,13 @@ class Producer(Thread):
 
     def dataPass(self, cmds):
         if cmds[0]=="add":
-            if self.view.time_int(cmds[3])>=self.view.time_int(cmds[4]): return False
+            if self.view.time_int(cmds[3])>=self.view.time_int(cmds[4]):
+                return False
+            if cmds[1] in self.constructCalendar().keys():
+                return False 
             return True
         elif cmds[0]=="del":
-            print self.constructCalendar()
-            print "C"* 32
-            if cmds[1] in self.constructCalendar():
+            if cmds[1] in self.constructCalendar().keys():
                 return True
             return False
   
