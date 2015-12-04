@@ -76,6 +76,7 @@ class Proposer(Thread):
                 break
 
     def run(self):
+        print "^_^ I am the leader(proposer) now. ^_^"
         while self.ID == Configuration.leader:
             data,addr = self.UDP.recv('', "event")
             if data == None : continue
