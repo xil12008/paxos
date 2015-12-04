@@ -63,7 +63,9 @@ class Proposer(Thread):
             if app_name == event["app_name"] : return True
             app = self.calendar[app_name]
             if app == None: continue
-            if app["day"]==event["day"] and self.timeConflict(app["startTime"],app["endTime"],event["startTime"],event["endTime"]) : return True
+            if app["day"]!=event["day"] : continue
+            if app["participants"].isdisjoint(event["participants"]) : continue
+            if self.timeConflict(app["startTime"],app["endTime"],event["startTime"],event["endTime"]) : return True
         return False
 
     def noEventDel(self, event):
