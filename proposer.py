@@ -24,27 +24,39 @@ class Proposer(Thread):
         synod.phase1()
         return synod.v!=None
 
+    def constructCalendar(self):
+        for entryID in self.synods:
+            entryVal = self.synods[entryID].v
+            if entryVal==None: continue
+            if entryVal["operation"] == "add":
+                if entryVal["app_name"] in self.calendar.keys():
+                    print "Error: add same appointment name for mulitiple times."
+                    break
+                self.calendar[entryVal["app_name"]] = entryVal
+            elif entryVal["operation"] == "del":
+                if not entryVal["app_name"] in self.calendar.keys():
+                    print "Error: try to delete an non-exist appointment."
+                    break
+                self.calendar.pop(entryVal["app_name"], None)
+
     # st1 start_time_1 et2 end_time_2
     def timeConflict(self, st1, et1, st2, et2):
         return (st1<et2 and st2<et1)
 
     def hasConflict(self, event):
-        for entryID in self.synods:
-            synod = self.synods[entryID]
-            if synod.v == None: continue
-            if synod.v["app_name"] == event["app_name"] : return True
-            if self.timeConflict(synod.v["startTime"],synod.v["endTime"],event["startTime"],event["endTime"]) : return True
+        for app_name in self.calendar:
+            if app_name == event["app_name"] : return True
+            app = self.calendar[app_name]
+            if app == None: continue
+            if app["day"]==event["day"] and self.timeConflict(app["startTime"],app["endTime"],event["startTime"],event["endTime"]) : return True
         return False
 
     def noEventDel(self, event):
-        for entryID in self.synods:
-            synod = self.synods[entryID]
-            if synod.v == None: continue
-            if synod.v["app_name"] == event["app_name"] : return False
-        return True
+        return not self.calendar.has_key(event["app_name"])
 
     def paxos(self, event):
         entryID = 0
+        self.calendar={}
         while(True):
             entryID+=1
             if self.synods.has_key(entryID) : continue
@@ -52,6 +64,7 @@ class Proposer(Thread):
                 synod = self.getSynod(entryID)
                 synod.allPhases()
             else :
+                self.constructCalendar()
                 if event["operation"]=="add" and self.hasConflict(event):
                     print "conflict", event
                     break
