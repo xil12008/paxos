@@ -93,9 +93,10 @@ class Proposer(Thread):
                     print "o===|================>\033[0m"
                     break
                 elif event["operation"]=="view": break
-
                 synod = self.getSynod(entryID, event)
                 synod.allPhases()
+
+                self.constructCalendar()
                 break
 
     def run(self):
