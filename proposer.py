@@ -76,20 +76,18 @@ class Proposer(Thread):
         self.readLog()
         while(True):
             entryID+=1
-            if self.synods.has_key(entryID) : continue
+            if self.synods.has_key(entryID) and self.synods[entryID].v!=None : continue
             if self.eventCheck(entryID) :
                 synod = self.getSynod(entryID)
                 synod.allPhases()
             else :
                 self.constructCalendar()
                 if event["operation"]=="add" and self.hasConflict(event):
-                    entryID-=1
                     print "<=================|==o"
                     print "conflict", event
                     print "o===|================>"
                     break
                 elif event["operation"]=="del" and self.noEventDel(event):
-                    entryID-=1
                     print "no delete", event
                     break
                 synod = self.getSynod(entryID, event)
