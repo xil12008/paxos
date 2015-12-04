@@ -77,7 +77,7 @@ class Producer(Thread):
                     if not self.dataPass(cmds):
                         print "Wrong Input"
                         continue
-                    self.queue.put({"operation":"add", "app_name":cmds[1], "day":self.view.days_int(cmds[2]), "startTime":self.view.time_int(cmds[3]), "endTime":self.view.time_int(cmds[4]), "participants":cmds[5]})
+                    self.queue.put({"operation":"add", "app_name":cmds[1], "day":self.view.days_int(cmds[2]), "startTime":self.view.time_int(cmds[3]), "endTime":self.view.time_int(cmds[4]), "participants":set(cmds[5].split(','))})
                     self.savequeue()
                     print "Roger that. Your command queue:"
                     self.printqueue()
