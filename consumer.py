@@ -11,7 +11,7 @@ class Consumer(Thread):
         Thread.__init__(self)
         self.event = None
         self.users_ip = conf.IPTABLE
-        self.UDP = udp.UDP(100)
+        self.UDP = udp.UDP(30)
         self.queue = queue
 
     def getEvent(self):
