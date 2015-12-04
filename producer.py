@@ -39,8 +39,8 @@ class Producer(Thread):
         finally:
             return record
 
-    def constructCalendar(self):
-        record = self.readlog()
+    def constructCalendar(self, record = None):
+        if not record: record = self.readlog()
         calendar = {} 
         for entryID in range(10000): 
             if entryID in record.keys():
@@ -94,16 +94,26 @@ class Producer(Thread):
                     self.savequeue()
                     print "Roger that. Your command queue:"
                     self.printqueue()
-            elif cmds[0]=="view":
+            elif cmds[0]=="viewlocal":
                 if len(cmds)!=1:
-                    warning = "format: view"
+                    warning = "format: viewlocal"
                     print warning
                     continue
                 else:
                     print "Roger that. Your local commited log:"
                     self.showCalendar()
                     print "Your calendar:"
-                    print self.constructCalendar()
+                    print self.constructCalendar().keys()
+            elif cmds[0]=="view":
+                if len(cmds)!=1:
+                    warning = "format: view"
+                    print warning
+                    continue
+                else:
+                    self.queue.put({"operation":"view"})
+                    self.savequeue()
+                    print "Roger that. Your command queue:"
+                    self.printqueue()
             elif cmds[0]=="log":
                 if len(cmds)!=1:
                     warning = "format: log"
@@ -125,12 +135,9 @@ class Producer(Thread):
             print "-" * 32 
             time.sleep(1)
 
-    def showCalendar(self, committed = True):
-        record = {}
+    def showCalendar(self, record = None, committed = True):
+        if not record: record = self.readlog()
         try:
-            f = open('acceptor.state', 'r')
-            for line in f:
-                record = eval(line)
             print "<" * 25
             for entryID in range(10000): 
                 if entryID in record.keys():
@@ -138,10 +145,10 @@ class Producer(Thread):
                         if "commitVal" in record[entryID].keys():
                             self.convertDate(record[entryID]["commitVal"])
                             print entryID, " | ",
-                            print(json.dumps(record[entryID]["commitVal"]))
+                            print record[entryID]["commitVal"].values()
                     else:
                         print entryID, ":", 
-                        print(json.dumps(record[entryID]))
+                        print record[entryID]
             print ">" * 25
         except:
             print "Empty"

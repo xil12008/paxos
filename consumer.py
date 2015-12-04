@@ -1,5 +1,7 @@
 import udp
+from view import View
 import Queue
+import pdb
 import random
 from threading import Thread
 import time
@@ -42,9 +44,31 @@ class Consumer(Thread):
         for user in self.users_ip:
             self.UDP.send(user,"event",str(self.event))
         data,addr = self.UDP.recv('', "complete")
-        if data == None : return False
-        print "send event done, recved:", data, "from", addr
+        if data == None : 
+            print "\033[94m Please wait. (due to leader dies, no majority of accepter found or just network problems.)"
+            print "-"*20 + '\033[0m'
+            return False
+        #print "send event done, recved:", data, "from", addr
+        if not data == "finish event":
+            self.remoteView(data)
         return True
+
+    def remoteView(self, data):
+        calendar = eval(data)
+        print "\033[94mRoger that. Your Calendar:"
+        for k, v in calendar.iteritems():
+            self.convertDate(v)
+            print k, "|", v  
+        print "-"*20 + '\033[0m'
+
+    def convertDate(self, dictionary):
+        view = View()
+        if "day" in dictionary.keys(): 
+            dictionary["day"] = view.days_str(dictionary["day"])
+        if "startTime" in dictionary.keys():
+            dictionary["startTime"] = view.time_str(dictionary["startTime"])
+        if "endTime" in dictionary.keys():
+            dictionary["endTime"] = view.time_str(dictionary["endTime"])
 
     def run(self):
         self.getEvent()
