@@ -25,6 +25,7 @@ class Proposer(Thread):
         return synod.v!=None
 
     def constructCalendar(self):
+        self.calendar={}
         for entryID in self.synods:
             entryVal = self.synods[entryID].v
             if entryVal==None: continue
@@ -38,6 +39,20 @@ class Proposer(Thread):
                     print "Error: try to delete an non-exist appointment."
                     break
                 self.calendar.pop(entryVal["app_name"], None)
+
+    def readLog(self):
+        record = {}
+        try:
+            f = open('acceptor.state', 'r')
+            for line in f: record = eval(line)
+        except: ""
+        for entryID in record.keys():
+            if self.synods.has_key(entryID): continue
+            if "maxPrepare" not in record[entryID].keys(): continue
+            if "commitVal" not in record[entryID].keys(): continue
+            self.getSynod(entryID)
+            self.synods[entryID].m = record[entryID]["maxPrepare"]
+            self.synods[entryID].v = record[entryID]["commitVal"]
 
     # st1 start_time_1 et2 end_time_2
     def timeConflict(self, st1, et1, st2, et2):
@@ -56,7 +71,7 @@ class Proposer(Thread):
 
     def paxos(self, event):
         entryID = 0
-        self.calendar={}
+        self.readLog()
         while(True):
             entryID+=1
             if self.synods.has_key(entryID) : continue
