@@ -66,9 +66,11 @@ class Proposer(Thread):
             else :
                 self.constructCalendar()
                 if event["operation"]=="add" and self.hasConflict(event):
+                    entryID-=1
                     print "conflict", event
                     break
                 elif event["operation"]=="del" and self.noEventDel(event):
+                    entryID-=1
                     print "no delete", event
                     break
                 synod = self.getSynod(entryID, event)
