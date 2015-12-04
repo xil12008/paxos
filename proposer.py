@@ -84,7 +84,7 @@ class Proposer(Thread):
             event = eval(data)
             self.paxos(event)
             self.UDP.send(user,"complete","finish event")
-        print "proposer(leader) quit"
+        print "$_$ proposer(leader) quit $_$"
 
 
 def testPaxos():
