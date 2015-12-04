@@ -40,9 +40,9 @@ class Consumer(Thread):
 
     def sendEvent(self):
         print "sendEvent: wait4leader"
-        self.wait4leader() 
-        for user in self.users_ip:
-            self.UDP.send(user,"event",str(self.event))
+        self.wait4leader()
+        if conf.leader==-1 : return False
+        self.UDP.send(conf.getIP(conf.leader),"event",str(self.event))
         data,addr = self.UDP.recv('', "complete")
         if data == None : 
             print "\033[94m Please wait. (due to leader dies, no majority of accepter found or just network problems.)"
