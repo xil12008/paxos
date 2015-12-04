@@ -88,8 +88,12 @@ class Proposer(Thread):
                     print "o===|================>\033[0m"
                     break
                 elif event["operation"]=="del" and self.noEventDel(event):
+                    print "\033[91m<=================|==o"
                     print "no delete", event
+                    print "o===|================>\033[0m"
                     break
+                elif event["operation"]=="view": break
+
                 synod = self.getSynod(entryID, event)
                 synod.allPhases()
                 break
@@ -102,7 +106,10 @@ class Proposer(Thread):
             user = addr[0]
             event = eval(data)
             self.paxos(event)
-            self.UDP.send(user,"complete","finish event")
+            if event["operation"]!="view":
+                self.UDP.send(user,"complete","finish event")
+            else:
+                self.UDP.send(user,"complete",str(self.calendar))
         print "$_$ proposer(leader) quit $_$"
 
 
