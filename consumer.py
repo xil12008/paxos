@@ -49,8 +49,7 @@ class Consumer(Thread):
             print "-"*20 + '\033[0m'
             return False
         #print "send event done, recved:", data, "from", addr
-        if not data == "finish event":
-            self.remoteView(data)
+        self.remoteView(data)
         return True
 
     def remoteView(self, data):
