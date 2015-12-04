@@ -83,12 +83,7 @@ class Proposer(Thread):
             else :
                 self.constructCalendar()
                 if event["operation"]=="add" and self.hasConflict(event):
-<<<<<<< HEAD
-                    print "<=================|==o"
-=======
-                    entryID-=1
                     print "\033[91m<=================|==o"
->>>>>>> 77718a57d7e38640ae8efebbfd0c1d36bbd8c564
                     print "conflict", event
                     print "o===|================>\033[0m"
                     break
