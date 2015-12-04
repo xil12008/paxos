@@ -106,10 +106,7 @@ class Proposer(Thread):
             user = addr[0]
             event = eval(data)
             self.paxos(event)
-            if event["operation"]!="view":
-                self.UDP.send(user,"complete","finish event")
-            else:
-                self.UDP.send(user,"complete",str(self.calendar))
+            self.UDP.send(user,"complete",str(self.calendar))
         print "$_$ proposer(leader) quit $_$"
 
 
