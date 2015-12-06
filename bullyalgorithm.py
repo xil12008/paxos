@@ -121,12 +121,18 @@ def checkalive():
     ID = Configuration.getMyID()
     #hold election by itself
     TCPSend(ID, "ELECTION")
+    noleadercount = 0
     while True:
        try:
           print "Check leader alive? My leader is", Configuration.leader 
           if Configuration.leader != -1:
               if TCPSend(Configuration.leader, "hi") == 1 : #leader dead
                   TCPSend(ID, "ELECTION")
+          else:
+              noleadercount += 1
+              if noleadercount >= 3: # has no leader in 20 * 3 seconds
+                  TCPSend(ID, "ELECTION")
+                  noleadercount = 0
        finally:
            time.sleep(20)
 
